@@ -16,13 +16,15 @@ local defaults = {
 }
 
 ---@class claude-code.State
-M = {
+local M = {
 	_defaults = defaults,
 }
 
 M.reset = function()
 	---@class claude-code.State
-	M = vim.tbl_deep_extend("keep", defaults, M)
+	for k, v in pairs(defaults) do
+		M[k] = v
+	end
 end
 
 M.reset()
