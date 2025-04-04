@@ -4,28 +4,85 @@ local auto_scroll = require("claude-code.auto_scroll")
 
 local M = {}
 
--- Opens Claude CLI with an input buffer
-M.open = function()
-	-- Create a split for the terminal
-	vim.cmd("new")
+---@param window_opts_override claude-code.WindowConfig | nil
+M.open = function(window_opts_override)
+	local window_config = window_opts_override or config.window
+	local width_percentage = window_config.width
+	local width = math.floor(vim.o.columns * width_percentage / 100)
 
-	-- Create terminal buffer using nvim API
-	state.claude_bufnr = vim.api.nvim_get_current_buf()
-	state.claude_winnr = vim.api.nvim_get_current_win()
+	-- Create buffers and windows based on position configuration
+	if window_config.position == "float" then
+		-- Create floating windows
+		-- Claude window (top)
+		local claude_buf = vim.api.nvim_create_buf(false, true)
+		local win_height = math.floor(vim.o.lines * 0.7)
+		local win_width = width
+		local row = math.floor((vim.o.lines - win_height - window_config.input_height) / 2)
+		local col = math.floor((vim.o.columns - win_width) / 2)
 
-	-- Start terminal job and store job_id in state
-	state.terminal_job_id = vim.fn.termopen(config.cmd)
+		local claude_opts = {
+			style = "minimal",
+			relative = "editor",
+			width = win_width,
+			height = win_height,
+			row = row,
+			col = col,
+			border = "rounded",
+		}
+
+		state.claude_winnr = vim.api.nvim_open_win(claude_buf, true, claude_opts)
+		state.claude_bufnr = claude_buf
+
+		-- Start terminal job and store job_id in state
+		state.terminal_job_id = vim.fn.termopen(config.cmd)
+
+		-- Input window (bottom)
+		local input_buf = vim.api.nvim_create_buf(true, false)
+		local input_height = window_config.input_height
+		local input_row = row + win_height
+
+		local input_opts = {
+			style = "minimal",
+			relative = "editor",
+			width = win_width,
+			height = input_height,
+			row = input_row,
+			col = col,
+			border = "rounded",
+		}
+
+		state.input_winnr = vim.api.nvim_open_win(input_buf, true, input_opts)
+		state.input_bufnr = input_buf
+	else
+		-- Create split windows (left or right)
+		if window_config.position == "right" then
+			vim.cmd("botright vertical new")
+			vim.cmd("vertical resize " .. width)
+		else -- default to left
+			vim.cmd("topleft vertical new")
+			vim.cmd("vertical resize " .. width)
+		end
+
+		-- Create terminal buffer using nvim API
+		state.claude_bufnr = vim.api.nvim_get_current_buf()
+		state.claude_winnr = vim.api.nvim_get_current_win()
+
+		-- Start terminal job and store job_id in state
+		state.terminal_job_id = vim.fn.termopen(config.cmd)
+
+		-- Create input buffer at the bottom
+		vim.cmd("split")
+		vim.cmd("resize " .. window_config.input_height)
+		state.input_bufnr = vim.api.nvim_create_buf(true, false)
+		vim.api.nvim_win_set_buf(0, state.input_bufnr)
+		state.input_winnr = vim.api.nvim_get_current_win()
+	end
 
 	-- Set terminal buffer options
 	vim.api.nvim_buf_set_option(state.claude_bufnr, "buflisted", false)
-	vim.cmd("setlocal nonumber norelativenumber")
-
-	-- Create input buffer at the bottom
-	vim.cmd("split")
-	vim.cmd("resize 10")
-	state.input_bufnr = vim.api.nvim_create_buf(true, false)
-	vim.api.nvim_win_set_buf(0, state.input_bufnr)
-	state.input_winnr = vim.api.nvim_get_current_win()
+	vim.api.nvim_win_call(state.claude_winnr, function()
+		vim.cmd("setlocal nonumber norelativenumber")
+	end)
 
 	-- Set input buffer options
 	vim.api.nvim_buf_set_option(state.input_bufnr, "buftype", "")

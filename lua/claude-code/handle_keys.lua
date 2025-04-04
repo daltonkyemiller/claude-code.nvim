@@ -48,7 +48,11 @@ M.setup_input_bufr_mappings = function()
 	vim.keymap.set("n", "<Esc>", function()
 		local escKey = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
 		vim.api.nvim_chan_send(state.terminal_job_id, escKey)
-	end)
+	end, { buffer = state.input_bufnr, silent = true })
+
+	vim.keymap.set("n", "<Tab>", function()
+		vim.api.nvim_set_current_win(state.claude_winnr)
+	end, { buffer = state.input_bufnr, silent = true })
 
 	-- Set up autocmd to update mappings when buffer content changes
 	vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
@@ -65,6 +69,10 @@ M.setup_input_bufr_mappings = function()
 end
 
 M.setup_claude_bufr_mappings = function()
+	vim.keymap.set("n", "<Tab>", function()
+		vim.api.nvim_set_current_win(state.input_winnr)
+	end, { buffer = state.claude_bufnr, silent = true })
+
 	vim.keymap.set("n", "q", function()
 		cmds.close()
 	end, { buffer = state.claude_bufnr, silent = true })

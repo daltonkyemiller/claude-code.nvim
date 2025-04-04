@@ -13,6 +13,12 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
     require("claude-code").setup({
       -- Optional configuration
       cmd = "claude", -- Command to invoke Claude CLI
+      hide_cli_input_box = true, -- Hide the Claude CLI input box prompt
+      window = {
+        position = "float", -- "float", "left", or "right"
+        width = 40, -- Width as percentage of screen
+        input_height = 10, -- Height of input window in lines
+      },
     })
   end,
 }
