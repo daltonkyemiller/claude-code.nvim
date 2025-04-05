@@ -1,5 +1,5 @@
-local config = require("claude-code.config")
-local state = require("claude-code.state")
+local config = require("claude-code.config"):get()
+local state = require("claude-code.state"):get()
 
 local M = {}
 

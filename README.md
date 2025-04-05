@@ -1,6 +1,20 @@
-# claude-code.nvim
+# Claude-Code.nvim
 
-A Neovim plugin for interacting with the Claude CLI.
+A Neovim plugin that integrates the Claude AI CLI directly into your editor.
+
+## Features
+
+- Interactive Claude AI conversations in a split window
+- Multiple window layout options (left, right, floating)
+- Customizable window dimensions
+- Auto-scrolling for Claude responses
+- Custom keyboard shortcuts
+
+## Requirements
+
+- Neovim 0.7.0 or later
+- Node.js installed on your system
+- [Claude CLI](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview) installed and configured
 
 ## Installation
 
@@ -11,49 +25,61 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
   "daltonkyemiller/claude-code.nvim",
   config = function()
     require("claude-code").setup({
-      -- Optional configuration
-      cmd = "claude", -- Command to invoke Claude CLI
-      hide_cli_input_box = true, -- Hide the Claude CLI input box prompt
-      window = {
-        position = "float", -- "float", "left", or "right"
-        width = 40, -- Width as percentage of screen
-        input_height = 10, -- Height of input window in lines
-      },
+      -- your configuration here
     })
-  end,
+  end
 }
+```
+
+Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
+
+```lua
+use {
+  "daltonkyemiller/claude-code.nvim",
+  config = function()
+    require("claude-code").setup({
+      -- your configuration here
+    })
+  end
+}
+```
+
+## Configuration
+
+```lua
+require("claude-code").setup({
+  cmd = "claude", -- Command to invoke Claude CLI
+  use_default_mappings = true, -- Set to false to use your own mappings
+  hide_cli_input_box = true, -- Hide the CLI input box prompt
+  window = {
+    position = "float", -- "left", "right", or "float"
+    width = 40, -- Width as percentage of screen width
+    input_height = 10 -- Height of input window in lines
+  }
+})
 ```
 
 ## Usage
 
-### Open Claude Interface
+Once installed and configured, you can use the following commands:
 
-```lua
-:lua require("claude-code").open()
-```
+- `:ClaudeOpen` - Open the Claude window
+- `:ClaudeClose` - Close the Claude window
+- `:ClaudeToggle` - Toggle the Claude window
 
-This will:
-1. Open a split window with Claude CLI in the top section
-2. Open an input buffer in the bottom section
-3. Set up keybindings for interaction
+### Default Keybindings
 
-### Close Claude Interface
+When in the input buffer:
+- `<C-Enter>` - Send the current buffer content to Claude
+- `<Esc>` - Exit input mode
 
-```lua
-:lua require("claude-code").close()
-```
+When in the Claude buffer:
+- Use normal Neovim terminal navigation
 
-This will:
-1. Stop the Claude CLI process
-2. Close both the terminal and input buffers
-3. Reset the plugin state
+## License
 
-### Key Bindings
+MIT
 
-In the input buffer:
-- `<Enter>` (normal mode): Sends the contents of the input buffer to the Claude CLI and clears the input buffer
+## Contributing
 
-## Requirements
-
-- Neovim 0.7.0+
-- Claude CLI installed and available in your path
+Contributions are welcome! Feel free to open issues or submit pull requests.

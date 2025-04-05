@@ -1,83 +1,14 @@
 local state = require("claude-code.state")
-local config = require("claude-code.config")
+local config = require("claude-code.config"):get()
 local auto_scroll = require("claude-code.auto_scroll")
 
 local M = {}
 
----@param window_opts_override claude-code.WindowConfig | nil
-M.open = function(window_opts_override)
-	local window_config = window_opts_override or config.window
-	local width_percentage = window_config.width
-	local width = math.floor(vim.o.columns * width_percentage / 100)
+local function setup_terminal_job()
+	state.terminal_job_id = vim.fn.termopen({ "node", "./node/pty.js" })
+end
 
-	-- Create buffers and windows based on position configuration
-	if window_config.position == "float" then
-		-- Create floating windows
-		-- Claude window (top)
-		local claude_buf = vim.api.nvim_create_buf(false, true)
-		local win_height = math.floor(vim.o.lines * 0.7)
-		local win_width = width
-		local row = math.floor((vim.o.lines - win_height - window_config.input_height) / 2)
-		local col = math.floor((vim.o.columns - win_width) / 2)
-
-		local claude_opts = {
-			style = "minimal",
-			relative = "editor",
-			width = win_width,
-			height = win_height,
-			row = row,
-			col = col,
-			border = "rounded",
-		}
-
-		state.claude_winnr = vim.api.nvim_open_win(claude_buf, true, claude_opts)
-		state.claude_bufnr = claude_buf
-
-		-- Start terminal job and store job_id in state
-		state.terminal_job_id = vim.fn.termopen({ "node", "./node/pty.js" })
-
-		-- Input window (bottom)
-		local input_buf = vim.api.nvim_create_buf(true, false)
-		local input_height = window_config.input_height
-		local input_row = row + win_height
-
-		local input_opts = {
-			style = "minimal",
-			relative = "editor",
-			width = win_width,
-			height = input_height,
-			row = input_row,
-			col = col,
-			border = "rounded",
-		}
-
-		state.input_winnr = vim.api.nvim_open_win(input_buf, true, input_opts)
-		state.input_bufnr = input_buf
-	else
-		-- Create split windows (left or right)
-		if window_config.position == "right" then
-			vim.cmd("botright vertical new")
-			vim.cmd("vertical resize " .. width)
-		else -- default to left
-			vim.cmd("topleft vertical new")
-			vim.cmd("vertical resize " .. width)
-		end
-
-		-- Create terminal buffer using nvim API
-		state.claude_bufnr = vim.api.nvim_get_current_buf()
-		state.claude_winnr = vim.api.nvim_get_current_win()
-
-		-- Start terminal job and store job_id in state
-		state.terminal_job_id = vim.fn.termopen(config.cmd)
-
-		-- Create input buffer at the bottom
-		vim.cmd("split")
-		vim.cmd("resize " .. window_config.input_height)
-		state.input_bufnr = vim.api.nvim_create_buf(true, false)
-		vim.api.nvim_win_set_buf(0, state.input_bufnr)
-		state.input_winnr = vim.api.nvim_get_current_win()
-	end
-
+local function setup_buffers_options()
 	-- Set terminal buffer options
 	vim.api.nvim_buf_set_option(state.claude_bufnr, "buflisted", false)
 	vim.api.nvim_win_call(state.claude_winnr, function()
@@ -90,6 +21,90 @@ M.open = function(window_opts_override)
 
 	-- set file type to "claude-code" to enable syntax highlighting
 	vim.api.nvim_buf_set_option(state.input_bufnr, "filetype", "claude-code")
+end
+
+local function create_float_windows(window_config, width)
+	-- Create floating windows
+	-- Claude window (top)
+	local claude_buf = vim.api.nvim_create_buf(false, true)
+	local win_height = math.floor(vim.o.lines * 0.7)
+	local win_width = width
+	local row = math.floor((vim.o.lines - win_height - window_config.input_height) / 2)
+	local col = math.floor((vim.o.columns - win_width) / 2)
+
+	local claude_opts = {
+		style = "minimal",
+		relative = "editor",
+		width = win_width,
+		height = win_height,
+		row = row,
+		col = col,
+		border = "rounded",
+	}
+
+	state.claude_winnr = vim.api.nvim_open_win(claude_buf, true, claude_opts)
+	state.claude_bufnr = claude_buf
+
+	-- Start terminal job and store job_id in state
+	setup_terminal_job()
+
+	-- Input window (bottom)
+	local input_buf = vim.api.nvim_create_buf(true, false)
+	local input_height = window_config.input_height
+	local input_row = row + win_height
+
+	local input_opts = {
+		style = "minimal",
+		relative = "editor",
+		width = win_width,
+		height = input_height,
+		row = input_row,
+		col = col,
+		border = "rounded",
+	}
+
+	state.input_winnr = vim.api.nvim_open_win(input_buf, true, input_opts)
+	state.input_bufnr = input_buf
+end
+
+local function create_split_windows(window_config, width)
+	-- Create split windows (left or right)
+	if window_config.position == "right" then
+		vim.cmd("botright vertical new")
+	else -- default to left
+		vim.cmd("topleft vertical new")
+	end
+	vim.cmd("vertical resize " .. width)
+
+	-- Create terminal buffer using nvim API
+	state.claude_bufnr = vim.api.nvim_get_current_buf()
+	state.claude_winnr = vim.api.nvim_get_current_win()
+
+	-- Start terminal job and store job_id in state
+	setup_terminal_job()
+
+	-- Create input buffer at the bottom
+	vim.cmd("split")
+	vim.cmd("resize " .. window_config.input_height)
+	state.input_bufnr = vim.api.nvim_create_buf(true, false)
+	vim.api.nvim_win_set_buf(0, state.input_bufnr)
+	state.input_winnr = vim.api.nvim_get_current_win()
+end
+
+---@param window_opts_override claude-code.WindowConfig | nil
+M.open = function(window_opts_override)
+	local window_config = window_opts_override or config.window
+	local width_percentage = window_config.width
+	local width = math.floor(vim.o.columns * width_percentage / 100)
+
+	-- Create buffers and windows based on position configuration
+	if window_config.position == "float" then
+		create_float_windows(window_config, width)
+	else
+		create_split_windows(window_config, width)
+	end
+
+	setup_buffers_options()
 
 	if config.use_default_mappings then
 		local handle_keys = require("claude-code.handle_keys")
@@ -117,7 +132,7 @@ M.close = function()
 		vim.api.nvim_buf_delete(state.input_bufnr, { force = true })
 	end
 
-	state.reset()
+	state_module:reset()
 end
 
 M.toggle = function()

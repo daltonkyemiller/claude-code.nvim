@@ -6,7 +6,7 @@
 ---@field terminal_job_id number | nil
 ---@field is_open boolean
 
-local defaults = {
+local DEFAULTS = {
 	claude_bufnr = nil,
 	claude_winnr = nil,
 	input_bufnr = nil,
@@ -15,18 +15,25 @@ local defaults = {
 	is_open = false,
 }
 
----@class claude-code.State
-local M = {
-	_defaults = defaults,
+local State = {
+	---@type claude-code.State
+	state = vim.deepcopy(DEFAULTS),
 }
 
-M.reset = function()
-	---@class claude-code.State
-	for k, v in pairs(defaults) do
-		M[k] = v
-	end
+function State:get()
+	return self.state
 end
 
-M.reset()
+function State:reset()
+	self.state = vim.deepcopy(DEFAULTS)
+end
 
-return M
+---@export State
+return setmetatable(State, {
+	__index = function(this, key)
+		return this.state[key]
+	end,
+	__newindex = function(this, key, value)
+		this.state[key] = value
+	end,
+})
