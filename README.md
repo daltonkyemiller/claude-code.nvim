@@ -23,6 +23,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 {
   "daltonkyemiller/claude-code.nvim",
+  build = "cd node && npm install",
   config = function()
     require("claude-code").setup({
       -- your configuration here
@@ -36,6 +37,7 @@ Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
 use {
   "daltonkyemiller/claude-code.nvim",
+  run = "cd node && npm install",
   config = function()
     require("claude-code").setup({
       -- your configuration here
