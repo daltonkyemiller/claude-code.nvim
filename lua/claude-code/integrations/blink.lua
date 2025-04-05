@@ -1,4 +1,4 @@
-local state = require("claude-code.state"):get()
+local state = require("claude-code.state")
 
 --- @module "blink.cmp"
 

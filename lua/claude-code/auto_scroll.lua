@@ -1,4 +1,4 @@
-local state = require("claude-code.state"):get()
+local state = require("claude-code.state")
 
 local M = {}
 
@@ -16,7 +16,12 @@ M.setup = function()
 		0,
 		100,
 		vim.schedule_wrap(function()
-			if vim.api.nvim_buf_is_valid(state.claude_bufnr) and vim.api.nvim_win_is_valid(state.claude_winnr) then
+			if
+				state.claude_bufnr
+				and state.claude_winnr
+				and vim.api.nvim_buf_is_valid(state.claude_bufnr)
+				and vim.api.nvim_win_is_valid(state.claude_winnr)
+			then
 				-- Only scroll if the Claude buffer is NOT focused
 				local current_win = vim.api.nvim_get_current_win()
 				if current_win ~= state.claude_winnr then

@@ -132,7 +132,7 @@ M.close = function()
 		vim.api.nvim_buf_delete(state.input_bufnr, { force = true })
 	end
 
-	state_module:reset()
+	state.reset()
 end
 
 M.toggle = function()

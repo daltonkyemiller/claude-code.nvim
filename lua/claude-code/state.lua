@@ -15,25 +15,23 @@ local DEFAULTS = {
 	is_open = false,
 }
 
-local State = {
-	---@type claude-code.State
-	state = vim.deepcopy(DEFAULTS),
-}
+local state = vim.deepcopy(DEFAULTS)
 
-function State:get()
-	return self.state
+local M = {}
+
+function M.reset()
+	for k, _ in pairs(state) do
+		state[k] = DEFAULTS[k]
+	end
 end
 
-function State:reset()
-	self.state = vim.deepcopy(DEFAULTS)
-end
-
----@export State
-return setmetatable(State, {
-	__index = function(this, key)
-		return this.state[key]
+setmetatable(M, {
+	__index = function(_, key)
+		return state[key]
 	end,
-	__newindex = function(this, key, value)
-		this.state[key] = value
+	__newindex = function(_, key, value)
+		state[key] = value
 	end,
 })
+
+return M

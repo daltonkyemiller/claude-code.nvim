@@ -1,4 +1,4 @@
-local state = require("claude-code.state"):get()
+local state = require("claude-code.state")
 local cmds = require("claude-code.commands")
 
 local M = {}
