@@ -34,7 +34,7 @@ M.open = function(window_opts_override)
 		state.claude_bufnr = claude_buf
 
 		-- Start terminal job and store job_id in state
-		state.terminal_job_id = vim.fn.termopen(config.cmd)
+		state.terminal_job_id = vim.fn.termopen({ "node", "./node/pty.js" })
 
 		-- Input window (bottom)
 		local input_buf = vim.api.nvim_create_buf(true, false)

@@ -33,7 +33,7 @@ M.setup_input_bufr_mappings = function()
 	-- Set keybinding to send input to Claude
 	vim.keymap.set("n", "<CR>", function()
 		local lines = vim.api.nvim_buf_get_lines(state.input_bufnr, 0, -1, false)
-		local input_text = table.concat(lines)
+		local input_text = table.concat(lines, "\n")
 
 		vim.api.nvim_chan_send(state.terminal_job_id, input_text)
 
