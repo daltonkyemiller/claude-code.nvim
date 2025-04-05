@@ -1,6 +1,6 @@
 # Claude-Code.nvim
 
-> **⚠️ WORK IN PROGRESS**: This plugin is under active development. APIs and functionality will change significantly.
+> **⚠️ WORK IN PROGRESS**: This plugin is under active development. APIs and functionality will change significantly
 
 A Neovim plugin that integrates the Claude AI CLI directly into your editor.
 
@@ -71,11 +71,7 @@ require("claude-code").setup({
 
 ## Usage
 
-Once installed and configured, you can use the following commands:
-
-- `:ClaudeOpen` - Open the Claude window
-- `:ClaudeClose` - Close the Claude window
-- `:ClaudeToggle` - Toggle the Claude window
+TODO 
 
 ### Default Keybindings
 
