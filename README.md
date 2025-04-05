@@ -51,12 +51,18 @@ use {
 ```lua
 require("claude-code").setup({
   cmd = "claude", -- Command to invoke Claude CLI
-  use_default_mappings = true, -- Set to false to use your own mappings
+  use_default_mappings = true, -- Set to false to disable automatic key mappings
   hide_cli_input_box = true, -- Hide the CLI input box prompt
   window = {
     position = "float", -- "left", "right", or "float"
     width = 40, -- Width as percentage of screen width
     input_height = 10 -- Height of input window in lines
+  },
+  keymaps = {
+    submit = "<C-s>", -- Keymap to submit input in normal mode
+    escape = "<Esc>", -- Keymap to send escape key
+    switch_window = "<Tab>", -- Keymap to switch between Claude and input windows
+    close = "q" -- Keymap to close Claude
   }
 })
 ```
@@ -72,11 +78,18 @@ Once installed and configured, you can use the following commands:
 ### Default Keybindings
 
 When in the input buffer:
-- `<C-Enter>` - Send the current buffer content to Claude
-- `<Esc>` - Exit input mode
+- `<CR>` (Enter) - Send the current buffer content to Claude (for backward compatibility)
+- `<C-s>` - Send the current buffer content to Claude
+- `<Esc>` - Send escape key to Claude
+- `<Tab>` - Switch to Claude buffer
+- `q` - Close Claude
 
 When in the Claude buffer:
+- `<Tab>` - Switch to input buffer
+- `q` - Close Claude
 - Use normal Neovim terminal navigation
+
+You can customize these keybindings by modifying the `keymaps` table in your configuration.
 
 ## License
 

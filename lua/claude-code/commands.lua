@@ -107,11 +107,9 @@ M.open = function(window_opts_override)
 
 	setup_buffers_options()
 
-	if config.use_default_mappings then
-		local handle_keys = require("claude-code.handle_keys")
-		handle_keys.setup_input_bufr_mappings()
-		handle_keys.setup_claude_bufr_mappings()
-	end
+	local handle_keys = require("claude-code.handle_keys")
+	handle_keys.setup_input_bufr_mappings()
+	handle_keys.setup_claude_bufr_mappings()
 
 	auto_scroll.setup()
 

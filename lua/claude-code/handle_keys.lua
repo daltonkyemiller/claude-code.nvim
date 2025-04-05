@@ -1,5 +1,6 @@
 local state = require("claude-code.state")
 local cmds = require("claude-code.commands")
+local config = require("claude-code.config")
 
 local M = {}
 
@@ -29,28 +30,33 @@ local function update_movement_mappings()
 	end
 end
 
+local function submit_input()
+	local lines = vim.api.nvim_buf_get_lines(state.input_bufnr, 0, -1, false)
+	local input_text = table.concat(lines, "\n")
+
+	vim.api.nvim_chan_send(state.terminal_job_id, input_text)
+
+	vim.schedule(function()
+		vim.api.nvim_chan_send(state.terminal_job_id, "\r")
+	end)
+
+	-- Clear input buffer
+	vim.api.nvim_buf_set_lines(state.input_bufnr, 0, -1, false, { "" })
+end
+
 M.setup_input_bufr_mappings = function()
-	-- Set keybinding to send input to Claude
-	vim.keymap.set("n", "<CR>", function()
-		local lines = vim.api.nvim_buf_get_lines(state.input_bufnr, 0, -1, false)
-		local input_text = table.concat(lines, "\n")
+	local keymaps = config.keymaps
 
-		vim.api.nvim_chan_send(state.terminal_job_id, input_text)
+	-- Set keybinding to send input to Claude (keep Enter key for backward compatibility)
+	vim.keymap.set("n", "<CR>", submit_input, { buffer = state.input_bufnr, silent = true })
+	vim.keymap.set("i", keymaps.submit, submit_input, { buffer = state.input_bufnr, silent = true })
 
-		vim.schedule(function()
-			vim.api.nvim_chan_send(state.terminal_job_id, "\r")
-		end)
-
-		-- Clear input buffer
-		vim.api.nvim_buf_set_lines(state.input_bufnr, 0, -1, false, { "" })
-	end, { buffer = state.input_bufnr, silent = true })
-
-	vim.keymap.set("n", "<Esc>", function()
+	vim.keymap.set("n", keymaps.escape, function()
 		local escKey = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
 		vim.api.nvim_chan_send(state.terminal_job_id, escKey)
 	end, { buffer = state.input_bufnr, silent = true })
 
-	vim.keymap.set("n", "<Tab>", function()
+	vim.keymap.set("n", keymaps.switch_window, function()
 		vim.api.nvim_set_current_win(state.claude_winnr)
 	end, { buffer = state.input_bufnr, silent = true })
 
@@ -63,17 +69,19 @@ M.setup_input_bufr_mappings = function()
 	-- Initial setup of mappings
 	update_movement_mappings()
 
-	vim.keymap.set("n", "q", function()
+	vim.keymap.set("n", keymaps.close, function()
 		cmds.close()
 	end, { buffer = state.input_bufnr, silent = true })
 end
 
 M.setup_claude_bufr_mappings = function()
-	vim.keymap.set("n", "<Tab>", function()
+	local keymaps = config.keymaps
+
+	vim.keymap.set("n", keymaps.switch_window, function()
 		vim.api.nvim_set_current_win(state.input_winnr)
 	end, { buffer = state.claude_bufnr, silent = true })
 
-	vim.keymap.set("n", "q", function()
+	vim.keymap.set("n", keymaps.close, function()
 		cmds.close()
 	end, { buffer = state.claude_bufnr, silent = true })
 end
