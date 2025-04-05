@@ -5,7 +5,8 @@ local auto_scroll = require("claude-code.auto_scroll")
 local M = {}
 
 local function setup_terminal_job()
-	state.terminal_job_id = vim.fn.termopen({ "node", "./node/pty.js" })
+	local node_script = vim.api.nvim_get_runtime_file("node/pty.js", false)[1]
+	state.terminal_job_id = vim.fn.termopen({ "node", node_script })
 end
 
 local function setup_buffers_options()
