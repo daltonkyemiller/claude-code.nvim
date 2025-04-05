@@ -1,5 +1,7 @@
 # Claude-Code.nvim
 
+> **⚠️ WORK IN PROGRESS**: This plugin is under active development. APIs and functionality will change significantly.
+
 A Neovim plugin that integrates the Claude AI CLI directly into your editor.
 
 ## Features
