@@ -5,13 +5,33 @@ local auto_scroll = require("claude-code.auto_scroll")
 local M = {}
 
 local function setup_terminal_job()
+	local term_args = {
+		on_exit = function()
+			M.close()
+		end,
+	}
 	if config.experimental.hide_input_box then
 		local win_cols = vim.api.nvim_win_get_width(state.claude_winnr)
+		local win_rows = vim.api.nvim_win_get_height(state.claude_winnr)
 		local node_script = vim.api.nvim_get_runtime_file("node/pty.js", false)[1]
-		state.terminal_job_id =
-			vim.fn.termopen({ "node", node_script, "--cols", tostring(win_cols), "--cmd", config.cmd })
+		local script_args = {
+			"node",
+			node_script,
+			"--cols",
+			tostring(win_cols),
+			"--rows",
+			tostring(win_rows),
+			"--cmd",
+			config.cmd,
+		}
+
+		if config.debug then
+			table.insert(script_args, "--debug")
+		end
+
+		state.terminal_job_id = vim.fn.termopen(script_args, term_args)
 	else
-		state.terminal_job_id = vim.fn.termopen(config.cmd)
+		state.terminal_job_id = vim.fn.termopen(config.cmd, term_args)
 	end
 end
 

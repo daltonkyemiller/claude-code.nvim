@@ -4,7 +4,7 @@ let loggingServer;
 export function startLoggingServer() {
   loggingServer = net.createServer(function (socket) {
     socket.on("data", function (data) {
-      console.log(JSON.stringify(data.toString()));
+      console.log(data.toString());
     });
   });
   loggingServer.listen(8000, () => {
