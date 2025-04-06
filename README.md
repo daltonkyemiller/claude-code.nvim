@@ -11,6 +11,7 @@ A Neovim plugin that integrates the Claude AI CLI directly into your editor.
 - Customizable window dimensions
 - Auto-scrolling for Claude responses
 - Custom keyboard shortcuts
+- Experimental feature to hide Claude's input box (using a separate node process and second PTY)
 
 ## Requirements
 
@@ -65,6 +66,9 @@ require("claude-code").setup({
     escape = "<Esc>", -- Keymap to send escape key
     switch_window = "<Tab>", -- Keymap to switch between Claude and input windows
     close = "q" -- Keymap to close Claude
+  },
+  experimental = {
+    hide_input_box = false, -- Hide Claude's input box prompt (uses a separate node process and a second PTY)
   }
 })
 ```

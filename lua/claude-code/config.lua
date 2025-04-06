@@ -9,11 +9,18 @@
 ---@field switch_window string: Keymap to switch between Claude and input windows (default: "<Tab>")
 ---@field close string: Keymap to close Claude (default: "q")
 
+---@class claude-code.ExperimentalConfigInput
+---@field hide_input_box boolean?: Whether to hide claude's input box prompt (default: false)
+
+---@class claude-code.ExperimentalConfig
+---@field hide_input_box boolean: Whether to hide claude's input box prompt (default: false)
+
 ---@class claude-code.Config
 ---@field cmd string: Command to invoke Claude CLI (default: "claude")
 ---@field hide_cli_input_box boolean: Whether to hide the CLI input box prompt (default: false)
 ---@field window claude-code.WindowConfig: Window configuration
 ---@field keymaps claude-code.KeymapConfig: Keymap configuration
+---@field experimental claude-code.ExperimentalConfig: Experimental configuration
 
 ---@class claude-code.WindowConfigInput
 ---@field position? "left" | "right" | "float": Position of windows (default: "right")
@@ -31,6 +38,7 @@
 --- @field hide_cli_input_box boolean?: Whether to hide the CLI input box prompt (default: false)
 --- @field window claude-code.WindowConfigInput?: Window configuration
 --- @field keymaps claude-code.KeymapConfigInput?: Keymap configuration
+--- @field experimental claude-code.ExperimentalConfig?: Experimental configuration
 
 local Config = {
 	---@type claude-code.Config
@@ -47,6 +55,9 @@ local Config = {
 			escape = "<Esc>",
 			switch_window = "<Tab>",
 			close = "q",
+		},
+		experimental = {
+			hide_input_box = false,
 		},
 	},
 }

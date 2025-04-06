@@ -5,8 +5,14 @@ local auto_scroll = require("claude-code.auto_scroll")
 local M = {}
 
 local function setup_terminal_job()
-	local node_script = vim.api.nvim_get_runtime_file("node/pty.js", false)[1]
-	state.terminal_job_id = vim.fn.termopen({ "node", node_script })
+	if config.experimental.hide_input_box then
+		local win_cols = vim.api.nvim_win_get_width(state.claude_winnr)
+		local node_script = vim.api.nvim_get_runtime_file("node/pty.js", false)[1]
+		state.terminal_job_id =
+			vim.fn.termopen({ "node", node_script, "--cols", tostring(win_cols), "--cmd", config.cmd })
+	else
+		state.terminal_job_id = vim.fn.termopen(config.cmd)
+	end
 end
 
 local function setup_buffers_options()
@@ -93,7 +99,7 @@ local function create_split_windows(window_config, width)
 end
 
 ---@param window_opts_override claude-code.WindowConfig | nil
-M.open = function(window_opts_override)
+function M.open(window_opts_override)
 	local window_config = window_opts_override or config.window
 	local width_percentage = window_config.width
 	local width = math.floor(vim.o.columns * width_percentage / 100)
@@ -116,7 +122,7 @@ M.open = function(window_opts_override)
 	state.is_open = true
 end
 
-M.close = function()
+function M.close()
 	-- Stop the job if it exists using our stored job_id
 	if state.terminal_job_id then
 		vim.fn.jobstop(state.terminal_job_id)
@@ -134,12 +140,20 @@ M.close = function()
 	state.reset()
 end
 
-M.toggle = function()
+function M.toggle()
 	if state.is_open == true then
 		M.close()
 	else
 		M.open()
 	end
+end
+
+function M.focus()
+	if not state.input_winnr or not vim.api.nvim_win_is_valid(state.claude_winnr) then
+		return
+	end
+
+	vim.api.nvim_set_current_win(state.input_winnr)
 end
 
 return M
