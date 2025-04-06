@@ -151,7 +151,7 @@ M.setup_input_bufr_mappings = function()
 	end, bufnr)
 
 	-- Set keymap to close
-	setup_both_mode_mappings(keymaps.close, cmds.close, bufnr)
+	setup_both_mode_mappings(keymaps.close, cmds.hide, bufnr)
 
 	local current_normal_mappings = vim.api.nvim_buf_get_keymap(bufnr, "n")
 	local current_insert_mappings = vim.api.nvim_buf_get_keymap(bufnr, "i")

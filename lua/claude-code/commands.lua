@@ -161,10 +161,14 @@ function M.close()
 end
 
 function M.toggle()
-	if state.is_open == true then
-		M.close()
+	if state.is_open then
+		M.hide()
 	else
-		M.open()
+		if state.terminal_job_id then
+			M.show()
+		else
+			M.open()
+		end
 	end
 end
 
@@ -174,6 +178,84 @@ function M.focus()
 	end
 
 	vim.api.nvim_set_current_win(state.input_winnr)
+end
+
+function M.hide()
+	if not state.is_open or not state.claude_winnr or not state.input_winnr then
+		return
+	end
+
+	if vim.api.nvim_win_is_valid(state.claude_winnr) then
+		vim.api.nvim_win_hide(state.claude_winnr)
+	end
+
+	if vim.api.nvim_win_is_valid(state.input_winnr) then
+		vim.api.nvim_win_hide(state.input_winnr)
+	end
+
+	state.is_open = false
+end
+
+function M.show()
+	if not state.claude_bufnr or not state.input_bufnr then
+		return
+	end
+
+	local window_config = config.window
+	local width_percentage = window_config.width
+	local width = math.floor(vim.o.columns * width_percentage / 100)
+
+	-- Recreate windows based on the original configuration
+	if window_config.position == "float" then
+		local win_height = math.floor(vim.o.lines * 0.7)
+		local row = math.floor((vim.o.lines - win_height - window_config.input_height) / 2)
+		local col = math.floor((vim.o.columns - width) / 2)
+
+		-- Recreate Claude window
+		local claude_opts = {
+			style = "minimal",
+			relative = "editor",
+			width = width,
+			height = win_height,
+			row = row,
+			col = col,
+			border = "rounded",
+		}
+		state.claude_winnr = vim.api.nvim_open_win(state.claude_bufnr, true, claude_opts)
+
+		-- Recreate input window
+		local input_height = window_config.input_height
+		local input_row = row + win_height
+		local input_opts = {
+			style = "minimal",
+			relative = "editor",
+			width = width,
+			height = input_height,
+			row = input_row,
+			col = col,
+			border = "rounded",
+		}
+		state.input_winnr = vim.api.nvim_open_win(state.input_bufnr, true, input_opts)
+	else
+		-- Recreate split windows
+		if window_config.position == "right" then
+			vim.cmd("botright vertical new")
+		else -- default to left
+			vim.cmd("topleft vertical new")
+		end
+		vim.cmd("vertical resize " .. width)
+
+		-- Set Claude buffer
+		vim.api.nvim_win_set_buf(0, state.claude_bufnr)
+		state.claude_winnr = vim.api.nvim_get_current_win()
+
+		-- Create input window
+		vim.cmd("split")
+		vim.cmd("resize " .. window_config.input_height)
+		vim.api.nvim_win_set_buf(0, state.input_bufnr)
+		state.input_winnr = vim.api.nvim_get_current_win()
+	end
+	state.is_open = true
 end
 
 return M
