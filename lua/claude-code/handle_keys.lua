@@ -65,7 +65,6 @@ local function update_movement_mappings(current_normal_mappings, current_insert_
 			-- Set for normal mode
 			if keymap and keymap.n ~= "none" then
 				setup_mode_mappings("n", keymap, function()
-					P("sending sequence to terminal job")
 					vim.api.nvim_chan_send(state.terminal_job_id, sequence)
 				end, state.input_bufnr)
 			end
