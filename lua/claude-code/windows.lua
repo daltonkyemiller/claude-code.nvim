@@ -33,17 +33,30 @@ local function setup_terminal_job()
 	else
 		state.terminal_job_id = vim.fn.termopen(config.cmd, term_args)
 	end
+
+	-- Stop the job when leaving Vim
+	-- vim.api.nvim_create_autocmd("VimLeavePre", {
+	-- 	callback = function()
+	-- 		P(state.terminal_job_id)
+	-- 		P("stopping terminal job")
+	-- 		if state.terminal_job_id then
+	-- 			vim.fn.jobstop(state.terminal_job_id)
+	-- 		end
+	-- 	end,
+	-- })
 end
 
 local function setup_buffers_options()
 	-- Set terminal buffer options
 	vim.api.nvim_buf_set_option(state.claude_bufnr, "buflisted", false)
+	vim.api.nvim_buf_set_option(state.claude_bufnr, "swapfile", false)
 	vim.api.nvim_win_call(state.claude_winnr, function()
 		vim.cmd("setlocal nonumber norelativenumber")
 	end)
 
 	-- Set input buffer options
-	vim.api.nvim_buf_set_option(state.input_bufnr, "buftype", "")
+	vim.api.nvim_buf_set_option(state.input_bufnr, "buftype", "nofile")
+	vim.api.nvim_buf_set_option(state.input_bufnr, "buflisted", false)
 	vim.api.nvim_buf_set_option(state.input_bufnr, "swapfile", false)
 
 	-- set file type to "claude-code" to enable syntax highlighting
@@ -91,7 +104,7 @@ local function create_float_windows(window_config, dimensions, use_existing_buff
 	}
 
 	state.claude_winnr = vim.api.nvim_open_win(claude_buf, true, claude_opts)
-	
+
 	if not use_existing_buffers then
 		state.claude_bufnr = claude_buf
 		-- Start terminal job and store job_id in state
@@ -110,7 +123,7 @@ local function create_float_windows(window_config, dimensions, use_existing_buff
 	}
 
 	state.input_winnr = vim.api.nvim_open_win(input_buf, true, input_opts)
-	
+
 	if not use_existing_buffers then
 		state.input_bufnr = input_buf
 	end
@@ -141,14 +154,14 @@ local function create_split_windows(window_config, dimensions, use_existing_buff
 	-- Create input window
 	vim.cmd("split")
 	vim.cmd("resize " .. window_config.input_height)
-	
+
 	if use_existing_buffers then
 		vim.api.nvim_win_set_buf(0, state.input_bufnr)
 	else
 		state.input_bufnr = vim.api.nvim_create_buf(true, false)
 		vim.api.nvim_win_set_buf(0, state.input_bufnr)
 	end
-	
+
 	state.input_winnr = vim.api.nvim_get_current_win()
 end
 
