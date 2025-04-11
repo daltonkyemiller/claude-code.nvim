@@ -4,6 +4,8 @@
 
 A Neovim plugin that integrates the Claude AI CLI directly into your editor.
 
+![Claude-Code.nvim](assets/claude_code_nvim.png)
+
 ## Features
 
 - Interactive Claude AI conversations in a split window
