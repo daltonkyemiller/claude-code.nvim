@@ -33,33 +33,29 @@ local function setup_terminal_job()
 	else
 		state.terminal_job_id = vim.fn.termopen(config.cmd, term_args)
 	end
+end
 
-	-- Stop the job when leaving Vim
-	-- vim.api.nvim_create_autocmd("VimLeavePre", {
-	-- 	callback = function()
-	-- 		P(state.terminal_job_id)
-	-- 		P("stopping terminal job")
-	-- 		if state.terminal_job_id then
-	-- 			vim.fn.jobstop(state.terminal_job_id)
-	-- 		end
-	-- 	end,
-	-- })
+local function setup_autocmds()
+	vim.api.nvim_create_autocmd({ "VimLeavePre", "QuitPre" }, {
+		callback = function()
+			M.close()
+		end,
+	})
 end
 
 local function setup_buffers_options()
 	-- Set terminal buffer options
 	vim.api.nvim_buf_set_option(state.claude_bufnr, "buflisted", false)
 	vim.api.nvim_buf_set_option(state.claude_bufnr, "swapfile", false)
+
 	vim.api.nvim_win_call(state.claude_winnr, function()
 		vim.cmd("setlocal nonumber norelativenumber")
 	end)
 
 	-- Set input buffer options
-	vim.api.nvim_buf_set_option(state.input_bufnr, "buftype", "nofile")
+	-- vim.api.nvim_buf_set_option(state.input_bufnr, "buftype", "nofile")
 	vim.api.nvim_buf_set_option(state.input_bufnr, "buflisted", false)
 	vim.api.nvim_buf_set_option(state.input_bufnr, "swapfile", false)
-
-	-- set file type to "claude-code" to enable syntax highlighting
 	vim.api.nvim_buf_set_option(state.input_bufnr, "filetype", "claude-code")
 end
 
@@ -192,6 +188,7 @@ end
 function M.open(window_opts_override)
 	local window_config = window_opts_override or config.window
 	setup_windows(window_config, false)
+	setup_autocmds()
 end
 
 function M.close()
