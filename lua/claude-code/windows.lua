@@ -1,50 +1,10 @@
 local auto_scroll = require("claude-code.auto_scroll")
 local config = require("claude-code.config"):get()
 local state = require("claude-code.state")
+local buffers = require("claude-code.buffers")
+local terminal = require("claude-code.terminal")
 
 local M = {}
-
-local function setup_terminal_job()
-  local term_args = {
-    on_exit = function() M.close() end,
-  }
-
-  if config.experimental.hide_input_box then
-    local win_cols = vim.api.nvim_win_get_width(state.claude_winnr)
-    local win_rows = vim.api.nvim_win_get_height(state.claude_winnr)
-    local node_script = vim.api.nvim_get_runtime_file("node/pty.js", false)[1]
-    local script_args = {
-      "node",
-      node_script,
-      "--cols",
-      tostring(win_cols),
-      "--rows",
-      tostring(win_rows),
-      "--cmd",
-      config.cmd,
-    }
-
-    if config.debug then table.insert(script_args, "--debug") end
-
-    state.terminal_job_id = vim.fn.termopen(script_args, term_args)
-  else
-    state.terminal_job_id = vim.fn.termopen(config.cmd, term_args)
-  end
-end
-
-local function setup_buffers_options()
-  -- Set terminal buffer options
-  vim.api.nvim_buf_set_option(state.claude_bufnr, "buflisted", false)
-  vim.api.nvim_buf_set_option(state.claude_bufnr, "swapfile", false)
-
-  vim.api.nvim_win_call(state.claude_winnr, function() vim.cmd("setlocal nonumber norelativenumber") end)
-
-  -- Set input buffer options
-  vim.api.nvim_buf_set_option(state.input_bufnr, "buflisted", false)
-  vim.api.nvim_buf_set_option(state.input_bufnr, "buftype", "nofile")
-  vim.api.nvim_buf_set_option(state.input_bufnr, "swapfile", false)
-  vim.api.nvim_buf_set_option(state.input_bufnr, "filetype", "claude-code")
-end
 
 local function calculate_window_dimensions(window_config)
   local width_percentage = window_config.width
@@ -71,8 +31,8 @@ local function create_float_windows(window_config, dimensions, use_existing_buff
     input_buf = state.input_bufnr
   else
     -- Create buffers
-    claude_buf = vim.api.nvim_create_buf(false, true)
-    input_buf = vim.api.nvim_create_buf(true, false)
+    claude_buf = buffers.create_terminal_buffer()
+    input_buf = buffers.create_input_buffer()
   end
 
   -- Claude window (top)
@@ -89,9 +49,8 @@ local function create_float_windows(window_config, dimensions, use_existing_buff
   state.claude_winnr = vim.api.nvim_open_win(claude_buf, true, claude_opts)
 
   if not use_existing_buffers then
-    state.claude_bufnr = claude_buf
     -- Start terminal job and store job_id in state
-    setup_terminal_job()
+    terminal.setup_job(function() M.close() end)
   end
 
   -- Input window (bottom)
@@ -106,8 +65,6 @@ local function create_float_windows(window_config, dimensions, use_existing_buff
   }
 
   state.input_winnr = vim.api.nvim_open_win(input_buf, true, input_opts)
-
-  if not use_existing_buffers then state.input_bufnr = input_buf end
 end
 
 local function create_split_windows(window_config, dimensions, use_existing_buffers)
@@ -124,12 +81,13 @@ local function create_split_windows(window_config, dimensions, use_existing_buff
     vim.api.nvim_win_set_buf(0, state.claude_bufnr)
     state.claude_winnr = vim.api.nvim_get_current_win()
   else
-    -- Create terminal buffer using nvim API
-    state.claude_bufnr = vim.api.nvim_get_current_buf()
+    -- Create terminal buffer
     state.claude_winnr = vim.api.nvim_get_current_win()
+    buffers.create_terminal_buffer()
+    vim.api.nvim_win_set_buf(state.claude_winnr, state.claude_bufnr)
 
     -- Start terminal job and store job_id in state
-    setup_terminal_job()
+    terminal.setup_job(function() M.close() end)
   end
 
   -- Create input window
@@ -139,7 +97,7 @@ local function create_split_windows(window_config, dimensions, use_existing_buff
   if use_existing_buffers then
     vim.api.nvim_win_set_buf(0, state.input_bufnr)
   else
-    state.input_bufnr = vim.api.nvim_create_buf(true, false)
+    buffers.create_input_buffer()
     vim.api.nvim_win_set_buf(0, state.input_bufnr)
   end
 
@@ -157,7 +115,7 @@ local function setup_windows(window_config, use_existing_buffers)
   end
 
   if not use_existing_buffers then
-    setup_buffers_options()
+    buffers.setup_buffer_options()
 
     local handle_keys = require("claude-code.handle_keys")
     handle_keys.setup_input_bufr_mappings()
@@ -178,19 +136,13 @@ end
 
 function M.close()
   -- Stop the job if it exists using our stored job_id
-  if state.terminal_job_id then vim.fn.jobstop(state.terminal_job_id) end
+  terminal.stop_job()
 
   -- Clean up the auto-scroll timer
   auto_scroll.cleanup()
 
   -- Close the buffers if they exist
-  if state.claude_bufnr and vim.api.nvim_buf_is_valid(state.claude_bufnr) then
-    vim.api.nvim_buf_delete(state.claude_bufnr, { force = true })
-  end
-
-  if state.input_bufnr and vim.api.nvim_buf_is_valid(state.input_bufnr) then
-    vim.api.nvim_buf_delete(state.input_bufnr, { force = true })
-  end
+  buffers.delete_buffers()
 
   state.reset()
 end

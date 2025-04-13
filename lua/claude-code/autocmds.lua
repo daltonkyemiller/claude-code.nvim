@@ -1,4 +1,4 @@
-local windows = require("claude-code.windows")
+local commands = require("claude-code.commands")
 
 local M = {}
 
@@ -14,7 +14,7 @@ function M.setup()
   -- Autocmd for cleanup on exit
   vim.api.nvim_create_autocmd({ "VimLeavePre", "QuitPre" }, {
     group = group,
-    callback = function() windows.close() end,
+    callback = function() commands.close() end,
   })
 end
 

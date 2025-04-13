@@ -1,6 +1,8 @@
 local cmds = require("claude-code.commands")
 local config = require("claude-code.config"):get()
 local state = require("claude-code.state")
+local terminal = require("claude-code.terminal")
+local buffers = require("claude-code.buffers")
 
 local M = {}
 
@@ -10,20 +12,17 @@ local function buf_lacks_content(bufnr)
 end
 
 local function submit_input()
-  local lines = vim.api.nvim_buf_get_lines(state.input_bufnr, 0, -1, false)
-  local input_text = table.concat(lines, "\n")
-
-  vim.api.nvim_chan_send(state.terminal_job_id, input_text)
-
-  vim.schedule(function() vim.api.nvim_chan_send(state.terminal_job_id, "\r") end)
+  local input_text = buffers.get_input_buffer_text()
+  
+  terminal.send_input(input_text)
+  terminal.send_enter()
 
   -- Clear input buffer
-  vim.api.nvim_buf_set_lines(state.input_bufnr, 0, -1, false, { "" })
+  buffers.clear_input_buffer()
 end
 
 local function send_escape()
-  local escKey = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-  vim.api.nvim_chan_send(state.terminal_job_id, escKey)
+  terminal.send_escape()
 end
 
 local function create_mapping(mode, key, callback, bufnr)
@@ -63,7 +62,7 @@ local function update_movement_mappings(current_normal_mappings, current_insert_
         setup_mode_mappings(
           "n",
           keymap,
-          function() vim.api.nvim_chan_send(state.terminal_job_id, sequence) end,
+          function() terminal.send_sequence(sequence) end,
           state.input_bufnr
         )
       end
@@ -73,7 +72,7 @@ local function update_movement_mappings(current_normal_mappings, current_insert_
         setup_mode_mappings(
           "i",
           keymap,
-          function() vim.api.nvim_chan_send(state.terminal_job_id, sequence) end,
+          function() terminal.send_sequence(sequence) end,
           state.input_bufnr
         )
       end
