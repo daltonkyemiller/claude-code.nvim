@@ -83,7 +83,7 @@ function debounceRender() {
     process.stdout.write(filtered);
 
     buffer = ""; // reset buffer
-  }, 50);
+  }, 10);
 }
 
 if (process.stdin.isTTY) {
