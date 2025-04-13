@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "pty",
+  "name": "pty-wrapper",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",

@@ -8,6 +8,7 @@ local function setup_terminal_job()
   local term_args = {
     on_exit = function() M.close() end,
   }
+
   if config.experimental.hide_input_box then
     local win_cols = vim.api.nvim_win_get_width(state.claude_winnr)
     local win_rows = vim.api.nvim_win_get_height(state.claude_winnr)
@@ -29,11 +30,6 @@ local function setup_terminal_job()
   else
     state.terminal_job_id = vim.fn.termopen(config.cmd, term_args)
   end
-end
-
-local function setup_autocmds()
-  local autocmds = require("claude-code.autocmds")
-  autocmds.setup()
 end
 
 local function setup_buffers_options()
@@ -177,7 +173,7 @@ end
 function M.open(window_opts_override)
   local window_config = window_opts_override or config.window
   setup_windows(window_config, false)
-  setup_autocmds()
+  require("claude-code.autocmds").setup()
 end
 
 function M.close()
