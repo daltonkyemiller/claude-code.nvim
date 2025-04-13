@@ -68,8 +68,6 @@
 ---@field debug boolean Whether to enable debug mode (default false)
 --------------------------------------------------------------------------------
 
-local utils = require("claude-code.utils")
-
 local Config = {
 	---@type claude-code.Config
 	config = {

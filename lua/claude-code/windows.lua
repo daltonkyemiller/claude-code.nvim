@@ -53,8 +53,8 @@ local function setup_buffers_options()
 	end)
 
 	-- Set input buffer options
-	-- vim.api.nvim_buf_set_option(state.input_bufnr, "buftype", "nofile")
 	vim.api.nvim_buf_set_option(state.input_bufnr, "buflisted", false)
+	vim.api.nvim_buf_set_option(state.input_bufnr, "buftype", "nofile")
 	vim.api.nvim_buf_set_option(state.input_bufnr, "swapfile", false)
 	vim.api.nvim_buf_set_option(state.input_bufnr, "filetype", "claude-code")
 end
