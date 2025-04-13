@@ -69,70 +69,62 @@
 --------------------------------------------------------------------------------
 
 local Config = {
-	---@type claude-code.Config
-	config = {
-		debug = false,
-		cmd = "claude",
-		hide_cli_input_box = true,
-		window = {
-			position = "right",
-			width = 40,
-			input_height = 10,
-		},
-		keymaps = {
-			submit = {
-				i = "<C-s>",
-				n = "<CR>",
-			},
-			escape = {
-				n = "<Esc>",
-				i = "none",
-			},
-			switch_window = {
-				n = "<Tab>",
-				i = "none",
-			},
-			close = {
-				n = "q",
-				i = "<C-c>",
-			},
-			arrow_up = {
-				n = "k",
-				i = "<C-k>",
-			},
-			arrow_down = {
-				n = "j",
-				i = "<C-j>",
-			},
-			arrow_left = {
-				n = "h",
-				i = "<C-h>",
-			},
-			arrow_right = {
-				n = "l",
-				i = "<C-l>",
-			},
-		},
-		experimental = {
-			hide_input_box = false,
-		},
-	},
+  ---@type claude-code.Config
+  config = {
+    debug = false,
+    cmd = "claude",
+    hide_cli_input_box = true,
+    window = {
+      position = "right",
+      width = 40,
+      input_height = 10,
+    },
+    keymaps = {
+      submit = {
+        i = "<C-s>",
+        n = "<CR>",
+      },
+      escape = {
+        n = "<Esc>",
+        i = "none",
+      },
+      switch_window = {
+        n = "<Tab>",
+        i = "none",
+      },
+      close = {
+        n = "q",
+        i = "<C-c>",
+      },
+      arrow_up = {
+        n = "k",
+        i = "<C-k>",
+      },
+      arrow_down = {
+        n = "j",
+        i = "<C-j>",
+      },
+      arrow_left = {
+        n = "h",
+        i = "<C-h>",
+      },
+      arrow_right = {
+        n = "l",
+        i = "<C-l>",
+      },
+    },
+    experimental = {
+      hide_input_box = false,
+    },
+  },
 }
 
-function Config:set(cfg)
-	self.config = vim.tbl_deep_extend("force", self.config, cfg)
-end
+function Config:set(cfg) self.config = vim.tbl_deep_extend("force", self.config, cfg) end
 
-function Config:get()
-	return self.config
-end
+function Config:get() return self.config end
 
 ---@export Config
 return setmetatable(Config, {
-	__index = function(this, k)
-		return this.config[k]
-	end,
-	__newindex = function(this, k, v)
-		error("Cannot set config values directly. Use setup() instead.")
-	end,
+  __index = function(this, k) return this.config[k] end,
+  __newindex = function(this, k, v) error("Cannot set config values directly. Use setup() instead.") end,
 })

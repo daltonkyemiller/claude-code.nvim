@@ -7,12 +7,12 @@
 ---@field is_open boolean
 
 local DEFAULTS = {
-	claude_bufnr = nil,
-	claude_winnr = nil,
-	input_bufnr = nil,
-	input_winnr = nil,
-	terminal_job_id = nil,
-	is_open = false,
+  claude_bufnr = nil,
+  claude_winnr = nil,
+  input_bufnr = nil,
+  input_winnr = nil,
+  terminal_job_id = nil,
+  is_open = false,
 }
 
 local state = vim.deepcopy(DEFAULTS)
@@ -20,18 +20,14 @@ local state = vim.deepcopy(DEFAULTS)
 local M = {}
 
 function M.reset()
-	for k, _ in pairs(state) do
-		state[k] = DEFAULTS[k]
-	end
+  for k, _ in pairs(state) do
+    state[k] = DEFAULTS[k]
+  end
 end
 
 setmetatable(M, {
-	__index = function(_, key)
-		return state[key]
-	end,
-	__newindex = function(_, key, value)
-		state[key] = value
-	end,
+  __index = function(_, key) return state[key] end,
+  __newindex = function(_, key, value) state[key] = value end,
 })
 
 return M
