@@ -1,7 +1,7 @@
 local auto_scroll = require("claude-code.auto_scroll")
+local buffers = require("claude-code.buffers")
 local config = require("claude-code.config"):get()
 local state = require("claude-code.state")
-local buffers = require("claude-code.buffers")
 local terminal = require("claude-code.terminal")
 
 local M = {}

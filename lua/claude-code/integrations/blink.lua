@@ -99,10 +99,6 @@ function M:get_completions(ctx, callback)
           insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
           label = cmd.cmd:sub(2),
           detail = cmd.desc,
-          -- documentation = {
-          -- 	kind = vim.lsp.protocol.MarkupKind.Markdown,
-          -- 	value = cmd.title,
-          -- },
           textEdit = {
             newText = cmd.cmd,
             range = edit_range,
