@@ -28,7 +28,8 @@ A Neovim plugin that integrates the Claude AI CLI directly into your editor.
 
 ## Installation
 
-Using [lazy.nvim](https://github.com/folke/lazy.nvim):
+<details>
+<summary>Using <a href="https://github.com/folke/lazy.nvim">lazy.nvim</a></summary>
 
 ```lua
 {
@@ -42,8 +43,10 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
   end
 }
 ```
+</details>
 
-Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
+<details>
+<summary>Using <a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a></summary>
 
 ```lua
 use({
@@ -57,10 +60,12 @@ use({
   end,
 })
 ```
+</details>
 
 ## Configuration
 
-Below is the full configuration with all available options:
+<details>
+<summary>Full configuration options</summary>
 
 ```lua
 require("claude-code").setup({
@@ -112,6 +117,7 @@ require("claude-code").setup({
   },
 })
 ```
+</details>
 
 ## Usage
 
@@ -121,28 +127,28 @@ The plugin exposes several Lua functions that can be used in your own mappings o
 
 ```lua
 -- Start Claude
-require("claude-code").open()
+require("claude-code.commands").open()
 
 -- Hide Claude windows (preserves state)
-require("claude-code").hide()
+require("claude-code.commands").hide()
 
 -- Show Claude windows (restores from hidden state)
-require("claude-code").show()
+require("claude-code.commands").show()
 
 -- Toggle between hidden and shown states (will start Claude if necessary)
-require("claude-code").toggle()
+require("claude-code.commands").toggle()
 
 -- Focus the input window
-require("claude-code").focus()
+require("claude-code.commands").focus()
 ```
 
 You can create commands for these functions:
 
 ```lua
-vim.api.nvim_create_user_command("Claude", function() require("claude-code").open() end, {})
-vim.api.nvim_create_user_command("ClaudeHide", function() require("claude-code").hide() end, {})
-vim.api.nvim_create_user_command("ClaudeShow", function() require("claude-code").show() end, {})
-vim.api.nvim_create_user_command("ClaudeToggle", function() require("claude-code").toggle() end, {})
+vim.api.nvim_create_user_command("Claude", function() require("claude-code.commands").open() end, {})
+vim.api.nvim_create_user_command("ClaudeHide", function() require("claude-code.commands").hide() end, {})
+vim.api.nvim_create_user_command("ClaudeShow", function() require("claude-code.commands").show() end, {})
+vim.api.nvim_create_user_command("ClaudeToggle", function() require("claude-code.commands").toggle() end, {})
 ```
 
 ### Default Keybindings
@@ -167,7 +173,8 @@ You can customize these keybindings by modifying the `keymaps` table in your con
 
 Claude-Code.nvim provides completion support for slash commands and prompt templates within the Claude input buffer.
 
-### nvim-cmp
+<details>
+<summary>nvim-cmp integration</summary>
 
 To integrate with [nvim-cmp](https://github.com/hrsh7th/nvim-cmp), add the Claude-Code source to your nvim-cmp configuration:
 
@@ -183,8 +190,10 @@ cmp.setup({
   },
 })
 ```
+</details>
 
-### blink.lua
+<details>
+<summary>blink.lua integration</summary>
 
 For integration with [blink.lua](https://github.com/yorickpeterse/blink.nvim), add the Claude-Code source to your blink.lua sources:
 
@@ -204,6 +213,7 @@ require("blink").setup({
   },
 })
 ```
+</details>
 
 ## License
 
