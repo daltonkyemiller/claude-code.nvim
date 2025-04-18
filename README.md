@@ -43,6 +43,7 @@ A Neovim plugin that integrates the Claude AI CLI directly into your editor.
   end
 }
 ```
+
 </details>
 
 <details>
@@ -60,6 +61,7 @@ use({
   end,
 })
 ```
+
 </details>
 
 ## Configuration
@@ -117,6 +119,7 @@ require("claude-code").setup({
   },
 })
 ```
+
 </details>
 
 ## Usage
@@ -174,7 +177,7 @@ You can customize these keybindings by modifying the `keymaps` table in your con
 Claude-Code.nvim provides completion support for slash commands and prompt templates within the Claude input buffer.
 
 <details>
-<summary>nvim-cmp integration</summary>
+<summary><a href="https://github.com/hrsh7th/nvim-cmp">nvim-cmp</a> integration</summary>
 
 To integrate with [nvim-cmp](https://github.com/hrsh7th/nvim-cmp), add the Claude-Code source to your nvim-cmp configuration:
 
@@ -190,10 +193,11 @@ cmp.setup({
   },
 })
 ```
+
 </details>
 
 <details>
-<summary>blink.lua integration</summary>
+<summary><a href="https://github.com/Saghen/blink.cmp">blink.cmp</a> integration</summary>
 
 For integration with [blink.lua](https://github.com/yorickpeterse/blink.nvim), add the Claude-Code source to your blink.lua sources:
 
@@ -213,6 +217,7 @@ require("blink").setup({
   },
 })
 ```
+
 </details>
 
 ## License
