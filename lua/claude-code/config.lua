@@ -2,18 +2,20 @@
 ---@class claude-code.ExperimentalConfigInput
 ---@field hide_input_box boolean? Whether to hide claude's input box prompt (default false)
 --------------------------------------------------------------------------------
----@class claude-code.ExperimentalConfig
+---@class claude-code.ExperimentalConfig : claude-code.ExperimentalConfigInput
 ---@field hide_input_box boolean Whether to hide claude's input box prompt (default false)
 --------------------------------------------------------------------------------
 
+---@alias claude-code.WindowPosition "left" | "right" | "float"
+
 --------------------------------------------------------------------------------
 ---@class claude-code.WindowConfigInput
----@field position? "left" | "right" | "float" Position of windows (default "right")
+---@field position? claude-code.WindowPosition Position of windows (default "right")
 ---@field width? number Width of windows as percentage of screen width (default 40)
 ---@field input_height? number Height of input window in lines (default 10)
 --------------------------------------------------------------------------------
 ---@class claude-code.WindowConfig
----@field position "left" | "right" | "float" Position of windows (default "right")
+---@field position claude-code.WindowPosition Position of windows (default "right")
 ---@field width number Width of windows as percentage of screen width (default 40)
 ---@field input_height number Height of input window in lines (default 10)
 --------------------------------------------------------------------------------
@@ -68,63 +70,68 @@
 ---@field debug boolean Whether to enable debug mode (default false)
 --------------------------------------------------------------------------------
 
-local Config = {
-  ---@type claude-code.Config
-  config = {
-    debug = false,
-    cmd = "claude",
-    hide_cli_input_box = true,
-    window = {
-      position = "right",
-      width = 40,
-      input_height = 10,
+---@type claude-code.Config
+local defaults = {
+  debug = false,
+  cmd = "claude",
+  hide_cli_input_box = true,
+  window = {
+    position = "right",
+    width = 40,
+    input_height = 10,
+  },
+  keymaps = {
+    submit = {
+      i = "<C-s>",
+      n = "<CR>",
     },
-    keymaps = {
-      submit = {
-        i = "<C-s>",
-        n = "<CR>",
-      },
-      escape = {
-        n = "<Esc>",
-        i = "none",
-      },
-      switch_window = {
-        n = "<Tab>",
-        i = "none",
-      },
-      close = {
-        n = "q",
-        i = "<C-c>",
-      },
-      arrow_up = {
-        n = "k",
-        i = "<C-k>",
-      },
-      arrow_down = {
-        n = "j",
-        i = "<C-j>",
-      },
-      arrow_left = {
-        n = "h",
-        i = "<C-h>",
-      },
-      arrow_right = {
-        n = "l",
-        i = "<C-l>",
-      },
+    escape = {
+      n = "<Esc>",
+      i = "none",
     },
-    experimental = {
-      hide_input_box = false,
+    switch_window = {
+      n = "<Tab>",
+      i = "none",
     },
+    close = {
+      n = "q",
+      i = "<C-c>",
+    },
+    arrow_up = {
+      n = "k",
+      i = "<C-k>",
+    },
+    arrow_down = {
+      n = "j",
+      i = "<C-j>",
+    },
+    arrow_left = {
+      n = "h",
+      i = "<C-h>",
+    },
+    arrow_right = {
+      n = "l",
+      i = "<C-l>",
+    },
+  },
+  experimental = {
+    hide_input_box = false,
   },
 }
 
-function Config:set(cfg) self.config = vim.tbl_deep_extend("force", self.config, cfg) end
+local config = vim.deepcopy(defaults)
 
-function Config:get() return self.config end
+---@class claude-code.ConfigModule : claude-code.Config
+local M = {}
 
----@export Config
-return setmetatable(Config, {
-  __index = function(this, k) return this.config[k] end,
+---@param cfg claude-code.ConfigInput
+function M:set(cfg) config = vim.tbl_deep_extend("force", config, cfg) end
+
+function M:get() return config end
+
+setmetatable(M, {
+  __index = function(this, k) return config[k] end,
   __newindex = function(this, k, v) error("Cannot set config values directly. Use setup() instead.") end,
 })
+
+return M

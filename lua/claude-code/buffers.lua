@@ -15,34 +15,28 @@ function M.create_input_buffer()
 end
 
 function M.setup_terminal_buffer_options()
-  if not state.claude_bufnr then
-    return false
-  end
-  
+  if not state.claude_bufnr then return false end
+
   -- Set terminal buffer options
   vim.api.nvim_buf_set_option(state.claude_bufnr, "buflisted", false)
   vim.api.nvim_buf_set_option(state.claude_bufnr, "swapfile", false)
-  
+
   if state.claude_winnr and vim.api.nvim_win_is_valid(state.claude_winnr) then
-    vim.api.nvim_win_call(state.claude_winnr, function() 
-      vim.cmd("setlocal nonumber norelativenumber") 
-    end)
+    vim.api.nvim_win_call(state.claude_winnr, function() vim.cmd("setlocal nonumber norelativenumber") end)
   end
-  
+
   return true
 end
 
 function M.setup_input_buffer_options()
-  if not state.input_bufnr then
-    return false
-  end
-  
+  if not state.input_bufnr then return false end
+
   -- Set input buffer options
   vim.api.nvim_buf_set_option(state.input_bufnr, "buflisted", false)
   vim.api.nvim_buf_set_option(state.input_bufnr, "buftype", "nofile")
   vim.api.nvim_buf_set_option(state.input_bufnr, "swapfile", false)
   vim.api.nvim_buf_set_option(state.input_bufnr, "filetype", "claude-code")
-  
+
   return true
 end
 
@@ -91,3 +85,4 @@ function M.delete_buffers()
 end
 
 return M
+

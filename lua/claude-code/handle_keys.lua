@@ -1,19 +1,19 @@
-local cmds = require("claude-code.commands")
-local config = require("claude-code.config"):get()
+local buffers = require("claude-code.buffers")
+local commands = require("claude-code.commands")
+local config = require("claude-code.config")
 local state = require("claude-code.state")
 local terminal = require("claude-code.terminal")
-local buffers = require("claude-code.buffers")
-
-local M = {}
 
 local function buf_lacks_content(bufnr)
-  local first_char = vim.api.nvim_buf_get_text(bufnr, 0, 0, 0, 1, {})[1] or ""
-  return first_char == "" or first_char == "\n" or first_char == nil
+  if not vim.api.nvim_buf_is_loaded(bufnr) then return true end
+
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  return #lines == 0 or (#lines == 1 and lines[1] == "")
 end
 
 local function submit_input()
   local input_text = buffers.get_input_buffer_text()
-  
+
   terminal.send_input(input_text)
   terminal.send_enter()
 
@@ -21,9 +21,7 @@ local function submit_input()
   buffers.clear_input_buffer()
 end
 
-local function send_escape()
-  terminal.send_escape()
-end
+local function send_escape() terminal.send_escape() end
 
 local function create_mapping(mode, key, callback, bufnr)
   if not key then return end
@@ -59,22 +57,12 @@ local function update_movement_mappings(current_normal_mappings, current_insert_
 
       -- Set for normal mode
       if keymap and keymap.n ~= "none" then
-        setup_mode_mappings(
-          "n",
-          keymap,
-          function() terminal.send_sequence(sequence) end,
-          state.input_bufnr
-        )
+        setup_mode_mappings("n", keymap, function() terminal.send_sequence(sequence) end, state.input_bufnr)
       end
 
       -- Set for insert mode
       if keymap and keymap.i ~= "none" then
-        setup_mode_mappings(
-          "i",
-          keymap,
-          function() terminal.send_sequence(sequence) end,
-          state.input_bufnr
-        )
+        setup_mode_mappings("i", keymap, function() terminal.send_sequence(sequence) end, state.input_bufnr)
       end
     end
   else
@@ -127,9 +115,16 @@ local function update_movement_mappings(current_normal_mappings, current_insert_
   end
 end
 
+local M = {}
+
 M.setup_input_bufr_mappings = function()
   local keymaps = config.keymaps
   local bufnr = state.input_bufnr
+
+  if bufnr == nil then
+    vim.notify("Claude Code: No input buffer found.", vim.log.levels.WARN)
+    return
+  end
 
   -- Set keymap to submit input
   setup_both_mode_mappings(keymaps.submit, submit_input, bufnr)
@@ -145,7 +140,7 @@ M.setup_input_bufr_mappings = function()
   )
 
   -- Set keymap to close
-  setup_both_mode_mappings(keymaps.close, cmds.hide, bufnr)
+  setup_both_mode_mappings(keymaps.close, commands.hide, bufnr)
 
   local current_normal_mappings = vim.api.nvim_buf_get_keymap(bufnr, "n")
   local current_insert_mappings = vim.api.nvim_buf_get_keymap(bufnr, "i")
@@ -171,7 +166,7 @@ M.setup_claude_bufr_mappings = function()
   setup_both_mode_mappings(keymaps.switch_window, function() vim.api.nvim_set_current_win(state.input_winnr) end, bufnr)
 
   -- Set keymap to close
-  setup_both_mode_mappings(keymaps.close, cmds.close, bufnr)
+  setup_both_mode_mappings(keymaps.close, commands.close, bufnr)
 end
 
 return M

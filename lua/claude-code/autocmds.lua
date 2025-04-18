@@ -1,4 +1,5 @@
 local commands = require("claude-code.commands")
+local state = require("claude-code.state")
 
 local M = {}
 
@@ -15,6 +16,15 @@ function M.setup()
   vim.api.nvim_create_autocmd({ "VimLeavePre", "QuitPre" }, {
     group = group,
     callback = function() commands.close() end,
+  })
+
+  vim.api.nvim_create_autocmd({ "BufEnter" }, {
+    group = group,
+    callback = function(args)
+      if args.buf == state.input_bufnr or args.buf == state.claude_bufnr then return end
+
+      state.last_visited_bufnr = args.buf
+    end,
   })
 end
 

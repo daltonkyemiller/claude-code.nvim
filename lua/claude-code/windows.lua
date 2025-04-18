@@ -1,6 +1,6 @@
 local auto_scroll = require("claude-code.auto_scroll")
 local buffers = require("claude-code.buffers")
-local config = require("claude-code.config"):get()
+local config = require("claude-code.config")
 local state = require("claude-code.state")
 local terminal = require("claude-code.terminal")
 
@@ -135,16 +135,11 @@ function M.open(window_opts_override)
 end
 
 function M.close()
-  -- Stop the job if it exists using our stored job_id
   terminal.stop_job()
-
-  -- Clean up the auto-scroll timer
   auto_scroll.cleanup()
-
-  -- Close the buffers if they exist
   buffers.delete_buffers()
 
-  state.reset()
+  state:reset()
 end
 
 function M.toggle()
