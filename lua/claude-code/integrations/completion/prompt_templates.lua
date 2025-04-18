@@ -42,7 +42,8 @@ local M = {
         :map(
           function(diagnostic)
             return string.format(
-              "%s:%s:%s: %s",
+              "%s %s:%s:%s: %s",
+              vim.diagnostic.severity[diagnostic.severity],
               diagnostic.lnum,
               diagnostic.col,
               diagnostic.severity,

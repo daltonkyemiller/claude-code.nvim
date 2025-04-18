@@ -16,7 +16,9 @@ A Neovim plugin that integrates the Claude AI CLI directly into your editor.
 - Window hide/show functionality to temporarily clear Claude from view
 - Arrow key navigation when input buffer is empty
 - Experimental feature to hide Claude's input box (using a separate node process and second PTY)
-- Integration with blink.lua
+- Completion support for slash commands and templates
+  - Integration with nvim-cmp
+  - Integration with blink.lua
 
 ## Requirements
 
@@ -45,14 +47,14 @@ Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
 
 ```lua
 use({
-	"daltonkyemiller/claude-code.nvim",
-	-- NOTE: only required if using experimental.hide_input_box feature
-	run = "cd node && npm install",
-	config = function()
-		require("claude-code").setup({
-			-- your configuration here
-		})
-	end,
+  "daltonkyemiller/claude-code.nvim",
+  -- NOTE: only required if using experimental.hide_input_box feature
+  run = "cd node && npm install",
+  config = function()
+    require("claude-code").setup({
+      -- your configuration here
+    })
+  end,
 })
 ```
 
@@ -62,52 +64,52 @@ Below is the full configuration with all available options:
 
 ```lua
 require("claude-code").setup({
-	cmd = "claude", -- Command to invoke Claude CLI
-	use_default_mappings = true, -- Set to false to disable automatic key mappings
-	debug = false, -- Enable debug logging
-	window = {
-		position = "float", -- "left", "right", or "float"
-		width = 40, -- Width as percentage of screen width
-		input_height = 10, -- Height of input window in lines
-	},
-	keymaps = {
-		submit = {
-			n = "<CR>",
-			i = "<C-s>",
-		},
-		escape = {
-			n = "<Esc>",
-			i = "<Esc>",
-		},
-		switch_window = {
-			n = "<Tab>",
-			i = "<Tab>",
-		},
-		close = {
-			n = "q",
-			i = "q",
-		},
-		-- Arrow key navigation (only active when input buffer is empty)
-		arrow_up = {
-			n = "k",
-			i = "<C-k>",
-		},
-		arrow_down = {
-			n = "j",
-			i = "<C-j>",
-		},
-		arrow_left = {
-			n = "h",
-			i = "<C-h>",
-		},
-		arrow_right = {
-			n = "l",
-			i = "<C-l>",
-		},
-	},
-	experimental = {
-		hide_input_box = false, -- Hide Claude's input box prompt (uses a separate node process and a second PTY)
-	},
+  cmd = "claude", -- Command to invoke Claude CLI
+  use_default_mappings = true, -- Set to false to disable automatic key mappings
+  debug = false, -- Enable debug logging
+  window = {
+    position = "float", -- "left", "right", or "float"
+    width = 40, -- Width as percentage of screen width
+    input_height = 10, -- Height of input window in lines
+  },
+  keymaps = {
+    submit = {
+      n = "<CR>",
+      i = "<C-s>",
+    },
+    escape = {
+      n = "<Esc>",
+      i = "<Esc>",
+    },
+    switch_window = {
+      n = "<Tab>",
+      i = "<Tab>",
+    },
+    close = {
+      n = "q",
+      i = "q",
+    },
+    -- Arrow key navigation (only active when input buffer is empty)
+    arrow_up = {
+      n = "k",
+      i = "<C-k>",
+    },
+    arrow_down = {
+      n = "j",
+      i = "<C-j>",
+    },
+    arrow_left = {
+      n = "h",
+      i = "<C-h>",
+    },
+    arrow_right = {
+      n = "l",
+      i = "<C-l>",
+    },
+  },
+  experimental = {
+    hide_input_box = false, -- Hide Claude's input box prompt (uses a separate node process and a second PTY)
+  },
 })
 ```
 
@@ -137,18 +139,10 @@ require("claude-code").focus()
 You can create commands for these functions:
 
 ```lua
-vim.api.nvim_create_user_command("Claude", function()
-	require("claude-code").open()
-end, {})
-vim.api.nvim_create_user_command("ClaudeHide", function()
-	require("claude-code").hide()
-end, {})
-vim.api.nvim_create_user_command("ClaudeShow", function()
-	require("claude-code").show()
-end, {})
-vim.api.nvim_create_user_command("ClaudeToggle", function()
-	require("claude-code").toggle()
-end, {})
+vim.api.nvim_create_user_command("Claude", function() require("claude-code").open() end, {})
+vim.api.nvim_create_user_command("ClaudeHide", function() require("claude-code").hide() end, {})
+vim.api.nvim_create_user_command("ClaudeShow", function() require("claude-code").show() end, {})
+vim.api.nvim_create_user_command("ClaudeToggle", function() require("claude-code").toggle() end, {})
 ```
 
 ### Default Keybindings
@@ -168,6 +162,48 @@ When in the Claude buffer:
 - `q` - Close Claude
 
 You can customize these keybindings by modifying the `keymaps` table in your configuration.
+
+## Completion Integrations
+
+Claude-Code.nvim provides completion support for slash commands and prompt templates within the Claude input buffer.
+
+### nvim-cmp
+
+To integrate with [nvim-cmp](https://github.com/hrsh7th/nvim-cmp), add the Claude-Code source to your nvim-cmp configuration:
+
+```lua
+local cmp = require("cmp")
+
+cmp.register_source("claude_code", require("claude-code.integrations.completion.nvim_cmp"))
+
+cmp.setup({
+  sources = {
+    { name = "claude-code" },
+    -- your other sources
+  },
+})
+```
+
+### blink.lua
+
+For integration with [blink.lua](https://github.com/yorickpeterse/blink.nvim), add the Claude-Code source to your blink.lua sources:
+
+```lua
+require("blink").setup({
+  sources = {
+    default = {
+      "claude_code", --[[ your other sources ]]
+    },
+    providers = {
+      claude_code = {
+        module = "claude-code.integrations.completion.blink",
+        name = "Claude Code",
+        opts = {},
+      },
+    },
+  },
+})
+```
 
 ## License
 
