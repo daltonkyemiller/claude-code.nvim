@@ -22,7 +22,7 @@ A Neovim plugin that integrates the Claude AI CLI directly into your editor.
 
 ## Requirements
 
-- Neovim 0.7.0 or later
+- Neovim 0.10.0 or later
 - Node.js installed on your system
 - [Claude CLI](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview) installed and configured
 
