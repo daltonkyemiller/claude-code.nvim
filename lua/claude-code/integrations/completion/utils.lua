@@ -5,6 +5,19 @@ local terminal = require("claude-code.terminal")
 
 local M = {}
 
+-- Convert PromptTemplate to CustomCompletionItem
+---@param cmd string
+---@param template claude-code.PromptTemplate
+---@return claude-code.CustomCompletionItem
+function M.template_to_completion_item(cmd, template)
+  return {
+    type = "custom",
+    cmd = cmd,
+    desc = template.desc,
+    on_execute = template.on_execute,
+  }
+end
+
 --- Creates a completion item from a command
 --- @param cmd claude-code.CompletionItem The completion command/item
 --- @param range table LSP range for the text edit
@@ -67,7 +80,7 @@ function M.execute_completion(item, callback, bufnr)
   if item.data.callback then
     item.data.callback(handle_apply, state)
   else
-    handle_apply("", state)
+    handle_apply("")
   end
 end
 

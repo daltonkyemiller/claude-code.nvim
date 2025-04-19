@@ -19,11 +19,11 @@ local defaults = {
     },
     escape = {
       n = "<Esc>",
-      i = "none",
+      i = false,
     },
     switch_window = {
       n = "<Tab>",
-      i = "none",
+      i = false,
     },
     close = {
       n = "q",
@@ -46,7 +46,72 @@ local defaults = {
       i = "<C-l>",
     },
   },
-  ---@type table<string, claude-code.PromptTemplate>
+  ---Setting a slash command to false will remove it from the completion list
+  ---@type table<string, claude-code.SlashCommand | false>
+  slash_commands = {
+    ["/clear"] = {
+      desc = "Clear conversation history and free up context.",
+    },
+    ["/compact"] = {
+      desc = "Clear conversation history but keep a summary in context. Optional: /compact [instructions for summarization]",
+    },
+    ["/config"] = {
+      desc = "Open config panel",
+    },
+    ["/cost"] = {
+      desc = "Show the total cost and duration of the current session",
+    },
+    ["/doctor"] = {
+      desc = "Checks the health of your Claude Code installation",
+    },
+    ["/exit"] = {
+      desc = "Exit the REPL",
+    },
+    ["/help"] = {
+      desc = "Show help and available commands",
+    },
+    ["/init"] = {
+      desc = "Initialize a new CLAUDE.md file with codebase documentation",
+    },
+    ["/mcp"] = {
+      desc = "Show MCP server connection status",
+    },
+    ["/memory"] = {
+      desc = "Edit Claude memory files",
+    },
+    ["/migrate-installer"] = {
+      desc = "Migrate from global npm installation to local installation",
+    },
+    ["/pr-comments"] = {
+      desc = "Get comments from a GitHub pull request",
+    },
+    ["/release-notes"] = {
+      desc = "View release notes",
+    },
+    ["/bug"] = {
+      desc = "Submit feedback about Claude Code",
+    },
+    ["/review"] = {
+      desc = "Review a pull request",
+    },
+    ["/theme"] = {
+      desc = "Change the theme (light/dark)",
+    },
+    ["/vim"] = {
+      desc = "Toggle between Vim and Normal editing modes",
+    },
+    ["/allowed-tools"] = {
+      desc = "List all currently allowed tools",
+    },
+    ["/logout"] = {
+      desc = "Sign out from your Anthropic account",
+    },
+    ["/login"] = {
+      desc = "Switch Anthropic accounts",
+    },
+  },
+  ---Setting a prompt template to false will remove it from the completion list
+  ---@type table<string, claude-code.PromptTemplate | false>
   prompt_templates = {
     ["#buffer"] = {
       desc = "Paste path of an open buffer",
@@ -120,7 +185,9 @@ local config = vim.deepcopy(defaults)
 local M = {}
 
 ---@param cfg claude-code.Config
-function M:set(cfg) config = vim.tbl_deep_extend("force", config, cfg) end
+function M:set(cfg)
+  config = vim.tbl_deep_extend("force", config, cfg)
+end
 
 function M:get() return config end
 

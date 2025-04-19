@@ -1,6 +1,5 @@
 local completion_utils = require("claude-code.integrations.completion.utils")
-local nvim_cmp_utils = require("claude-code.integrations.completion.nvim_cmp.utils")
-local slash_commands = require("claude-code.integrations.completion.slash_commands")
+local config = require("claude-code.config"):get()
 
 ---@class SlashCommandsSource : cmp.Source
 local SlashCommandsSource = {}
@@ -18,15 +17,21 @@ function SlashCommandsSource:complete(param, callback)
 
   local items = {}
 
+  local slash_commands = {}
 
-  for _, command in ipairs(slash_commands) do
-    local edit_range = nvim_cmp_utils.get_edit_range(command, "/", context)
-    table.insert(items, completion_utils.map_completion_item(command, edit_range, true))
+  for cmd, command_config in pairs(config.slash_commands) do
+    if not command_config then goto continue end
+    table.insert(slash_commands, {
+      type = "claude",
+      cmd = cmd,
+      desc = command_config.desc,
+    })
+    ::continue::
   end
 
   callback({
     isIncomplete = true,
-    items = items,
+    items = slash_commands,
   })
 end
 

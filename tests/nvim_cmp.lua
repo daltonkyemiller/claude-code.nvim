@@ -20,16 +20,16 @@ require("lazy.minit").repro({
         },
         keymaps = {
           arrow_down = {
-            i = "none",
+            i = false,
           },
           arrow_up = {
-            i = "none",
+            i = false,
           },
           arrow_left = {
-            i = "none",
+            i = false,
           },
           arrow_right = {
-            i = "none",
+            i = false,
           },
         },
         experimental = {

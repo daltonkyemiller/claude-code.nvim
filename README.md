@@ -66,6 +66,8 @@ use({
 
 ## Configuration
 
+You can view the default configuration [here](lua/claude-code/config.lua).
+
 <details>
 <summary>Full configuration options</summary>
 
@@ -113,6 +115,15 @@ require("claude-code").setup({
       n = "l",
       i = "<C-l>",
     },
+  },
+  -- Configure slash commands (can set to false to remove a command)
+  slash_commands = {
+    -- Example: Remove a built-in slash command
+    -- ["/clear"] = false,
+  },
+  -- Configure prompt templates
+  prompt_templates = {
+    -- Your custom prompt templates
   },
   experimental = {
     hide_input_box = false, -- Hide Claude's input box prompt (uses a separate node process and a second PTY)

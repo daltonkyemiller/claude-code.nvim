@@ -56,12 +56,12 @@ local function update_movement_mappings(current_normal_mappings, current_insert_
       local sequence = key.sequence
 
       -- Set for normal mode
-      if keymap and keymap.n ~= "none" then
+      if keymap and keymap.n ~= false then
         setup_mode_mappings("n", keymap, function() terminal.send_sequence(sequence) end, state.input_bufnr)
       end
 
       -- Set for insert mode
-      if keymap and keymap.i ~= "none" then
+      if keymap and keymap.i ~= false then
         setup_mode_mappings("i", keymap, function() terminal.send_sequence(sequence) end, state.input_bufnr)
       end
     end
@@ -71,7 +71,7 @@ local function update_movement_mappings(current_normal_mappings, current_insert_
       local keymap = keymaps[key.name]
 
       -- Restore or remove normal mode mapping
-      if keymap and keymap.n ~= "none" then
+      if keymap and keymap.n ~= false then
         local old_mapping = vim.iter(current_normal_mappings):find(function(mapping) return mapping.lhs == keymap.n end)
         if old_mapping then
           if not old_mapping.rhs and not old_mapping.callback then return end
@@ -92,7 +92,7 @@ local function update_movement_mappings(current_normal_mappings, current_insert_
       end
 
       -- Restore or remove insert mode mapping
-      if keymap and keymap.i ~= "none" then
+      if keymap and keymap.i ~= false then
         local old_mapping = vim.iter(current_insert_mappings):find(function(mapping) return mapping.lhs == keymap.i end)
         if old_mapping then
           if not old_mapping.rhs and not old_mapping.callback then return end
