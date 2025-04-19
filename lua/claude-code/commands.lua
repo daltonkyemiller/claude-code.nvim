@@ -13,6 +13,7 @@ function M.open(window_opts_override)
   local window_config = window_opts_override or config.window
   windows.setup_windows(window_config, false)
   autocmds.setup(M.close)
+  vim.cmd("startinsert!")
 end
 
 function M.close()
@@ -45,8 +46,8 @@ function M.hide() windows.hide_windows() end
 
 function M.show()
   if not state.claude_bufnr or not state.input_bufnr then return end
-
   windows.setup_windows(config.window, true)
+  vim.cmd("startinsert!")
 end
 
 return M
