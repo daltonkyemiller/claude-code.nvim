@@ -1,3 +1,4 @@
+local state = require("claude-code.state")
 local terminal = require("claude-code.terminal")
 
 --- @module "claude-code.integrations.completion.utils"
@@ -13,7 +14,6 @@ local M = {}
 function M.map_completion_item(cmd, range, keep_prefix, source_name)
   return {
     source_id = "claude-code",
-    source_name = source_name or "slash_commands",
     score_offset = 5,
     label = keep_prefix and cmd.cmd or cmd.cmd:sub(2),
     detail = cmd.desc,
@@ -35,8 +35,7 @@ end
 --- @param item table The completion item
 --- @param callback function Callback to run after completion
 --- @param bufnr? number Optional buffer number
---- @param default_implementation? function Optional default implementation function
-function M.execute_completion(item, callback, bufnr, default_implementation)
+function M.execute_completion(item, callback, bufnr)
   --- @param new_text string
   local function handle_apply(new_text)
     vim.lsp.util.apply_text_edits(
@@ -66,9 +65,9 @@ function M.execute_completion(item, callback, bufnr, default_implementation)
   end
 
   if item.data.callback then
-    item.data.callback(handle_apply)
+    item.data.callback(handle_apply, state)
   else
-    handle_apply("")
+    handle_apply("", state)
   end
 end
 

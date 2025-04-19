@@ -1,6 +1,6 @@
 local completion_utils = require("claude-code.integrations.completion.utils")
+local config = require("claude-code.config"):get()
 local nvim_cmp_utils = require("claude-code.integrations.completion.nvim_cmp.utils")
-local prompt_templates = require("claude-code.integrations.completion.prompt_templates")
 
 ---@class PromptTemplateSource : cmp.Source
 local PromptTemplateSource = {}
@@ -18,7 +18,14 @@ function PromptTemplateSource:complete(param, callback)
 
   local items = {}
 
-  for _, command in ipairs(prompt_templates) do
+  for cmd, prompt_template in pairs(config.prompt_templates) do
+    ---@type claude-code.CustomCompletionItem
+    local command = {
+      type = "custom",
+      cmd = cmd,
+      desc = prompt_template.desc,
+      on_execute = prompt_template.on_execute,
+    }
     local edit_range = nvim_cmp_utils.get_edit_range(command, "#", context)
     table.insert(items, completion_utils.map_completion_item(command, edit_range, true))
   end

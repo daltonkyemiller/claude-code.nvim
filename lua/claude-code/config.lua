@@ -1,76 +1,8 @@
---------------------------------------------------------------------------------
----@class claude-code.ExperimentalConfigInput
----@field hide_input_box boolean? Whether to hide claude's input box prompt (default false)
---------------------------------------------------------------------------------
----@class claude-code.ExperimentalConfig : claude-code.ExperimentalConfigInput
----@field hide_input_box boolean Whether to hide claude's input box prompt (default false)
---------------------------------------------------------------------------------
+---@class claude-code.PromptTemplate
+---@field desc string
+---@field on_execute fun(replace_text: (fun(text: string): nil), state: claude-code.State): nil
 
----@alias claude-code.WindowPosition "left" | "right" | "float"
-
---------------------------------------------------------------------------------
----@class claude-code.WindowConfigInput
----@field position? claude-code.WindowPosition Position of windows (default "right")
----@field width? number Width of windows as percentage of screen width (default 40)
----@field input_height? number Height of input window in lines (default 10)
---------------------------------------------------------------------------------
----@class claude-code.WindowConfig
----@field position claude-code.WindowPosition Position of windows (default "right")
----@field width number Width of windows as percentage of screen width (default 40)
----@field input_height number Height of input window in lines (default 10)
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
----@class claude-code.KeymapItemConfig
----@field n string | "none" Keymap in normal mode
----@field i string | "none" Keymap in insert mode
---------------------------------------------------------------------------------
----@class claude-code.KeymapItemConfigInput
----@field n (string | "none")? Keymap in normal mode
----@field i (string | "none")? Keymap in insert mode
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
----@class claude-code.KeymapConfigInput
----@field submit claude-code.KeymapItemConfigInput? Keymap to submit input in normal mode (default "<C-s>")
----@field escape claude-code.KeymapItemConfigInput?  Keymap to send escape key (default "<Esc>")
----@field switch_window claude-code.KeymapItemConfigInput? Keymap to switch between Claude and input windows (default "<Tab>")
----@field close claude-code.KeymapItemConfigInput?  Keymap to close Claude (default "q")
----@field arrow_up claude-code.KeymapItemConfigInput? Keymap to move up(only when input buffer is empty) in normal mode (default "k" in normal mode, "<C-k>" in insert mode)
----@field arrow_down claude-code.KeymapItemConfigInput? Keymap to move down(only when input buffer is empty) in normal mode (default "j" in normal mode, "<C-j>" in insert mode)
----@field arrow_left claude-code.KeymapItemConfigInput? Keymap to move left(only when input buffer is empty) in normal mode (default "h" in normal mode, "<C-h>" in insert mode)
----@field arrow_right claude-code.KeymapItemConfigInput? Keymap to move right(only when input buffer is empty) in normal mode (default "l" in normal mode, "<C-l>" in insert mode)
---------------------------------------------------------------------------------
----@class claude-code.KeymapConfig
----@field submit claude-code.KeymapItemConfig Keymap to submit input in normal mode (default "<C-s>")
----@field escape claude-code.KeymapItemConfig  Keymap to send escape key (default "<Esc>" in normal mode, "<S-Esc>" in insert mode)
----@field switch_window claude-code.KeymapItemConfig   Keymap to switch between Claude and input windows (default "<Tab>" in normal mode, "<Tab>" in insert mode)
----@field close claude-code.KeymapItemConfig  Keymap to close Claude (default "q" in normal mode, "<C-c>" in insert mode)
----@field arrow_up claude-code.KeymapItemConfig? Keymap to move up(only when input buffer is empty) in normal mode (default "k" in normal mode, "<C-k>" in insert mode)
----@field arrow_down claude-code.KeymapItemConfig? Keymap to move down(only when input buffer is empty) in normal mode (default "j" in normal mode, "<C-j>" in insert mode)
----@field arrow_left claude-code.KeymapItemConfig? Keymap to move left(only when input buffer is empty) in normal mode (default "h" in normal mode, "<C-h>" in insert mode)
----@field arrow_right claude-code.KeymapItemConfig? Keymap to move right(only when input buffer is empty) in normal mode (default "l" in normal mode, "<C-l>" in insert mode)
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
----@class claude-code.ConfigInput
----@field cmd string? Command to invoke Claude CLI (default "claude")
----@field hide_cli_input_box boolean? Whether to hide the CLI input box prompt (default false)
----@field window claude-code.WindowConfigInput? Window configuration
----@field keymaps claude-code.KeymapConfigInput? Keymap configuration
----@field experimental claude-code.ExperimentalConfig? Experimental configuration
----@field debug boolean? Whether to enable debug mode (default false)
---------------------------------------------------------------------------------
 ---@class claude-code.Config
----@field cmd string Command to invoke Claude CLI (default "claude")
----@field hide_cli_input_box boolean Whether to hide the CLI input box prompt (default false)
----@field window claude-code.WindowConfig Window configuration
----@field keymaps claude-code.KeymapConfig Keymap configuration
----@field experimental claude-code.ExperimentalConfig Experimental configuration
----@field debug boolean Whether to enable debug mode (default false)
---------------------------------------------------------------------------------
-
----@type claude-code.Config
 local defaults = {
   debug = false,
   cmd = "claude",
@@ -114,6 +46,69 @@ local defaults = {
       i = "<C-l>",
     },
   },
+  ---@type table<string, claude-code.PromptTemplate>
+  prompt_templates = {
+    ["#buffer"] = {
+      desc = "Paste path of an open buffer",
+      on_execute = function(replace_text, state)
+        if state.last_visited_bufnr == nil or vim.api.nvim_buf_is_valid(state.last_visited_bufnr) == false then
+          vim.notify("No last visited buffer", vim.log.levels.ERROR)
+          return replace_text("")
+        end
+
+        local file_name = vim.api.nvim_buf_get_name(state.last_visited_bufnr)
+        local relative_to_cwd = vim.fn.fnamemodify(file_name, ":.")
+        replace_text(relative_to_cwd)
+      end,
+    },
+    ["#diagnostics"] = {
+      desc = "Paste diagnostics from an open buffer",
+      on_execute = function(replace_text, state)
+        if state.last_visited_bufnr == nil or vim.api.nvim_buf_is_valid(state.last_visited_bufnr) == false then
+          vim.notify("No last visited buffer", vim.log.levels.ERROR)
+          return replace_text("")
+        end
+
+        local diagnostics = vim.diagnostic.get(state.last_visited_bufnr)
+
+        if #diagnostics == 0 then
+          vim.notify("No diagnostics found", vim.log.levels.WARN)
+          return replace_text("")
+        end
+
+        local file_name = vim.api.nvim_buf_get_name(state.last_visited_bufnr)
+        local relative_to_cwd = vim.fn.fnamemodify(file_name, ":.")
+
+        local diagnostics_strs = vim
+          .iter(diagnostics)
+          :map(
+            function(diagnostic)
+              return string.format(
+                "%s %s:%s:%s: %s",
+                vim.diagnostic.severity[diagnostic.severity],
+                diagnostic.lnum,
+                diagnostic.col,
+                diagnostic.severity,
+                diagnostic.message
+              )
+            end
+          )
+          :totable()
+
+        local diagnostics_str = table.concat(diagnostics_strs, "\n")
+
+        local prompt_template = [[
+The following diagnostics were found in ]] .. relative_to_cwd .. [[:
+
+%s
+
+Can you help me fix them?
+]]
+
+        replace_text(string.format(prompt_template, diagnostics_str))
+      end,
+    },
+  },
   experimental = {
     hide_input_box = false,
   },
@@ -124,7 +119,7 @@ local config = vim.deepcopy(defaults)
 ---@class claude-code.ConfigModule : claude-code.Config
 local M = {}
 
----@param cfg claude-code.ConfigInput
+---@param cfg claude-code.Config
 function M:set(cfg) config = vim.tbl_deep_extend("force", config, cfg) end
 
 function M:get() return config end

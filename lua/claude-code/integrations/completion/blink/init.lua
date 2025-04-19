@@ -1,5 +1,5 @@
 local completion_utils = require("claude-code.integrations.completion.utils")
-local prompt_templates = require("claude-code.integrations.completion.prompt_templates")
+local config = require("claude-code.config"):get()
 local slash_commands = require("claude-code.integrations.completion.slash_commands")
 
 --- @module "blink.cmp"
@@ -38,6 +38,20 @@ function M:get_completions(ctx, callback)
     })
   end
 
+  ---@type claude-code.CompletionItem[]
+  local prompt_templates = {}
+  for cmd, prompt_template in pairs(config.prompt_templates) do
+    ---@type claude-code.CustomCompletionItem
+    local command = {
+      type = "custom",
+      cmd = cmd,
+      desc = prompt_template.desc,
+      on_execute = prompt_template.on_execute,
+    }
+
+    table.insert(prompt_templates, command)
+  end
+
   local trigger_char_to_items = {
     ["/"] = slash_commands,
     ["#"] = prompt_templates,
@@ -59,8 +73,6 @@ function M:get_completions(ctx, callback)
     :totable())
 end
 
-function M:execute(ctx, item, callback, default_implementation)
-  completion_utils.execute_completion(item, callback, ctx.bufnr, default_implementation)
-end
+function M:execute(ctx, item, callback) completion_utils.execute_completion(item, callback, ctx.bufnr) end
 
 return M
