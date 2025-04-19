@@ -11,10 +11,11 @@ require("lazy.minit").repro({
   spec = {
     {
       dir = ".",
+      event = "VeryLazy",
       opts = {
         -- debug = true,
         window = {
-          position = "float",
+          -- position = "float",
           width = 40,
         },
         keymaps = {
@@ -55,8 +56,6 @@ require("lazy.minit").repro({
       config = function()
         local cmp = require("cmp")
 
-        cmp.register_source("claude_code", require("claude-code.integrations.completion.nvim_cmp"))
-
         cmp.setup({
           snippet = {
             expand = function(args) end,
@@ -69,8 +68,7 @@ require("lazy.minit").repro({
             ["<Tab>"] = cmp.mapping.confirm({ select = true }),
           }),
           sources = {
-            { name = "claude_code" },
-            -- { name = "path" },
+            { name = "path" },
           },
         })
       end,

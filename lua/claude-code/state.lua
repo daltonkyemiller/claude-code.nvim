@@ -4,6 +4,7 @@
 ---@field input_bufnr number | nil
 ---@field input_winnr number | nil
 ---@field last_visited_bufnr number | nil
+---@field last_visited_winnr number | nil
 ---@field terminal_job_id number | nil
 ---@field is_open boolean
 
@@ -13,6 +14,7 @@ local defaults = {
   input_bufnr = nil,
   input_winnr = nil,
   last_visited_bufnr = vim.api.nvim_get_current_buf(),
+  last_visited_winnr = vim.api.nvim_get_current_win(),
   terminal_job_id = nil,
   is_open = false,
 }

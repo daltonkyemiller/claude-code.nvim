@@ -4,6 +4,33 @@ local terminal = require("claude-code.terminal")
 
 local M = {}
 
+--- Creates a completion item from a command
+--- @param cmd claude-code.CompletionItem The completion command/item
+--- @param range table LSP range for the text edit
+--- @param keep_prefix boolean Whether to keep the prefix (default: false)
+--- @param source_name? string The source name (default: "slash_commands")
+--- @return blink.cmp.CompletionItem
+function M.map_completion_item(cmd, range, keep_prefix, source_name)
+  return {
+    source_id = "claude-code",
+    source_name = source_name or "slash_commands",
+    score_offset = 5,
+    label = keep_prefix and cmd.cmd or cmd.cmd:sub(2),
+    detail = cmd.desc,
+    -- documentation = cmd.desc,
+    kind = vim.lsp.protocol.CompletionItemKind.Function,
+    insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
+    textEdit = {
+      newText = cmd.cmd,
+      range = range,
+    },
+    data = {
+      type = cmd.type,
+      callback = cmd.type == "custom" and cmd.on_execute or nil,
+    },
+  }
+end
+
 --- Handle applying text and executing commands after completion
 --- @param item table The completion item
 --- @param callback function Callback to run after completion
@@ -12,21 +39,19 @@ local M = {}
 function M.execute_completion(item, callback, bufnr, default_implementation)
   --- @param new_text string
   local function handle_apply(new_text)
-    if type(default_implementation) == "function" or new_text ~= "" then
-      vim.lsp.util.apply_text_edits(
-        { { newText = new_text, range = item.textEdit.range } },
-        bufnr or vim.api.nvim_get_current_buf(),
-        "utf-8"
-      )
+    vim.lsp.util.apply_text_edits(
+      { { newText = new_text, range = item.textEdit.range } },
+      bufnr ~= nil and bufnr or vim.api.nvim_get_current_buf(),
+      "utf-8"
+    )
 
-      -- Calculate cursor position for multi-line text
-      local lines = vim.split(new_text, "\n", { plain = true })
-      local last_line = lines[#lines]
-      local end_line = item.textEdit.range.start.line + #lines - 1
-      local end_col = #lines == 1 and item.textEdit.range.start.character + #new_text or #last_line
+    -- Calculate cursor position for multi-line text
+    local lines = vim.split(new_text, "\n", { plain = true })
+    local last_line = lines[#lines]
+    local end_line = item.textEdit.range.start.line + #lines - 1
+    local end_col = #lines == 1 and item.textEdit.range.start.character + #new_text or #last_line
 
-      vim.api.nvim_win_set_cursor(0, { end_line + 1, end_col })
-    end
+    vim.api.nvim_win_set_cursor(0, { end_line + 1, end_col })
 
     if item.data.type == "claude" then
       local cmd = item.label

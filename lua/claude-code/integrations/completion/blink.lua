@@ -1,6 +1,6 @@
+local completion_utils = require("claude-code.integrations.completion.utils")
 local prompt_templates = require("claude-code.integrations.completion.prompt_templates")
 local slash_commands = require("claude-code.integrations.completion.slash_commands")
-local completion_utils = require("claude-code.integrations.completion.utils")
 
 --- @module "blink.cmp"
 
@@ -52,24 +52,9 @@ function M:get_completions(ctx, callback)
     ---@param cmd claude-code.CompletionItem
     :map(function(cmd)
       --- @type blink.cmp.CompletionItem
-      return {
-        score_offset = 5,
-        source_id = "claude-code",
-        source_name = "slash_commands",
-        cursor_column = ctx.bounds.start_col,
-        kind = vim.lsp.protocol.CompletionItemKind.Function,
-        insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
-        label = cmd.cmd:sub(2),
-        detail = cmd.desc,
-        textEdit = {
-          newText = cmd.cmd,
-          range = edit_range,
-        },
-        data = {
-          type = cmd.type,
-          callback = cmd.type == "custom" and cmd.on_execute or nil,
-        },
-      }
+      local item = completion_utils.map_completion_item(cmd, edit_range, false)
+      item.cursor_column = ctx.bounds.start_col
+      return item
     end)
     :totable())
 end
