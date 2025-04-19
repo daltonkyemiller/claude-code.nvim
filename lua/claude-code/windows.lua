@@ -1,12 +1,17 @@
+---@class claude-code.WindowDimensions
+---@field width number
+---@field height number
+---@field row number
+---@field col number
+
 local auto_scroll = require("claude-code.auto_scroll")
 local buffers = require("claude-code.buffers")
-local config = require("claude-code.config")
 local state = require("claude-code.state")
 local terminal = require("claude-code.terminal")
 
 local M = {}
 
-local function calculate_window_dimensions(window_config)
+function M.calculate_window_dimensions(window_config)
   local width_percentage = window_config.width
   local width = math.floor(vim.o.columns * width_percentage / 100)
   local win_height = math.floor(vim.o.lines * 0.7)
@@ -23,7 +28,10 @@ local function calculate_window_dimensions(window_config)
   }
 end
 
-local function create_float_windows(window_config, dimensions, use_existing_buffers)
+---@param window_config claude-code.WindowConfig
+---@param dimensions claude-code.WindowDimensions
+---@param use_existing_buffers boolean
+function M.create_float_windows(window_config, dimensions, use_existing_buffers)
   local claude_buf, input_buf
 
   if use_existing_buffers then
@@ -50,7 +58,7 @@ local function create_float_windows(window_config, dimensions, use_existing_buff
 
   if not use_existing_buffers then
     -- Start terminal job and store job_id in state
-    terminal.setup_job(function() M.close() end)
+    terminal.setup_job(function() require("claude-code.commands").close() end)
   end
 
   -- Input window (bottom)
@@ -67,7 +75,10 @@ local function create_float_windows(window_config, dimensions, use_existing_buff
   state.input_winnr = vim.api.nvim_open_win(input_buf, true, input_opts)
 end
 
-local function create_split_windows(window_config, dimensions, use_existing_buffers)
+---@param window_config claude-code.WindowConfig
+---@param dimensions claude-code.WindowDimensions
+---@param use_existing_buffers boolean
+function M.create_split_windows(window_config, dimensions, use_existing_buffers)
   -- Create split windows (left or right)
   if window_config.position == "right" then
     vim.cmd("botright vertical new")
@@ -87,11 +98,10 @@ local function create_split_windows(window_config, dimensions, use_existing_buff
     vim.api.nvim_win_set_buf(state.claude_winnr, state.claude_bufnr)
 
     -- Start terminal job and store job_id in state
-    terminal.setup_job(function() M.close() end)
+    terminal.setup_job(function() require("claude-code.commands").close() end)
   end
 
-  -- Create input window
-  vim.cmd("split")
+  vim.cmd("belowright split")
   vim.cmd("resize " .. window_config.input_height)
 
   if use_existing_buffers then
@@ -104,14 +114,16 @@ local function create_split_windows(window_config, dimensions, use_existing_buff
   state.input_winnr = vim.api.nvim_get_current_win()
 end
 
-local function setup_windows(window_config, use_existing_buffers)
-  local dimensions = calculate_window_dimensions(window_config)
+---@param window_config claude-code.WindowConfig
+---@param use_existing_buffers boolean
+function M.setup_windows(window_config, use_existing_buffers)
+  local dimensions = M.calculate_window_dimensions(window_config)
 
   -- Create buffers and windows based on position configuration
   if window_config.position == "float" then
-    create_float_windows(window_config, dimensions, use_existing_buffers)
+    M.create_float_windows(window_config, dimensions, use_existing_buffers)
   else
-    create_split_windows(window_config, dimensions, use_existing_buffers)
+    M.create_split_windows(window_config, dimensions, use_existing_buffers)
   end
 
   if not use_existing_buffers then
@@ -127,40 +139,7 @@ local function setup_windows(window_config, use_existing_buffers)
   state.is_open = true
 end
 
----@param window_opts_override claude-code.WindowConfig | nil
-function M.open(window_opts_override)
-  local window_config = window_opts_override or config.window
-  setup_windows(window_config, false)
-  require("claude-code.autocmds").setup()
-end
-
-function M.close()
-  terminal.stop_job()
-  auto_scroll.cleanup()
-  buffers.delete_buffers()
-
-  state:reset()
-end
-
-function M.toggle()
-  if state.is_open then
-    M.hide()
-  else
-    if state.terminal_job_id then
-      M.show()
-    else
-      M.open()
-    end
-  end
-end
-
-function M.focus()
-  if not state.input_winnr or not vim.api.nvim_win_is_valid(state.claude_winnr) then return end
-
-  vim.api.nvim_set_current_win(state.input_winnr)
-end
-
-function M.hide()
+function M.hide_windows()
   if not state.is_open or not state.claude_winnr or not state.input_winnr then return end
 
   -- Clean up auto-scroll timer when hiding
@@ -171,12 +150,6 @@ function M.hide()
   if vim.api.nvim_win_is_valid(state.input_winnr) then vim.api.nvim_win_hide(state.input_winnr) end
 
   state.is_open = false
-end
-
-function M.show()
-  if not state.claude_bufnr or not state.input_bufnr then return end
-
-  setup_windows(config.window, true)
 end
 
 return M

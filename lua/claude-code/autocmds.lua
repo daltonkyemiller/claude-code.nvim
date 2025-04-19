@@ -1,4 +1,3 @@
-local commands = require("claude-code.commands")
 local state = require("claude-code.state")
 
 local M = {}
@@ -9,13 +8,14 @@ local function create_augroup()
   return group
 end
 
-function M.setup()
+---@param on_close fun(): nil
+function M.setup(on_close)
   local group = create_augroup()
 
   -- Autocmd for cleanup on exit
   vim.api.nvim_create_autocmd({ "VimLeavePre", "QuitPre" }, {
     group = group,
-    callback = function() commands.close() end,
+    callback = on_close,
   })
 
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
