@@ -126,11 +126,11 @@ M.setup_input_bufr_mappings = function()
     return
   end
 
-  -- Set keymap to submit input
   setup_both_mode_mappings(keymaps.submit, submit_input, bufnr)
 
-  -- Set keymap to send escape
   setup_both_mode_mappings(keymaps.escape, send_escape, bufnr)
+
+  setup_both_mode_mappings(keymaps.shift_tab, function() terminal.send_sequence("\x1b[Z") end, bufnr)
 
   -- Set keymap to switch window
   setup_both_mode_mappings(

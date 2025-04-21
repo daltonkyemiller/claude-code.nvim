@@ -17,6 +17,10 @@ local defaults = {
       i = "<C-s>",
       n = "<CR>",
     },
+    shift_tab = {
+      n = "<S-Tab>",
+      i = false,
+    },
     escape = {
       n = "<Esc>",
       i = false,
