@@ -185,9 +185,7 @@ local config = vim.deepcopy(defaults)
 local M = {}
 
 ---@param cfg claude-code.Config
-function M:set(cfg)
-  config = vim.tbl_deep_extend("force", config, cfg)
-end
+function M:set(cfg) config = vim.tbl_deep_extend("force", config, cfg) end
 
 function M:get() return config end
 
