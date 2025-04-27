@@ -15,6 +15,7 @@ A Neovim plugin that integrates the Claude AI CLI directly into your editor.
 - Custom keyboard shortcuts with separate normal/insert mode mappings
 - Window hide/show functionality to temporarily clear Claude from view
 - Arrow key navigation when input buffer is empty
+- `@` file mentioning to include files in Claude's context
 - Experimental feature to hide Claude's input box (using a separate node process and second PTY)
 - Completion support for slash commands and templates
   - Integration with nvim-cmp
@@ -175,6 +176,7 @@ When in the input buffer:
 - `<Tab>` - Switch to Claude buffer (normal mode)
 - `q` - Close Claude (normal mode)
 - `hjkl` - Navigate the input buffer (normal mode)
+- `@` - Mention a file to include in Claude's context (completion available)
 
 When in the Claude buffer:
 
@@ -237,3 +239,4 @@ MIT
 ## Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests.
+
