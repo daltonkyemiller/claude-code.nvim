@@ -195,8 +195,6 @@ To integrate with [nvim-cmp](https://github.com/hrsh7th/nvim-cmp), add the Claud
 ```lua
 local cmp = require("cmp")
 
-cmp.register_source("claude_code", require("claude-code.integrations.completion.nvim_cmp"))
-
 cmp.setup({
   sources = {
     { name = "claude-code" },
@@ -216,7 +214,8 @@ For integration with [blink.lua](https://github.com/yorickpeterse/blink.nvim), a
 require("blink").setup({
   sources = {
     default = {
-      "claude_code", --[[ your other sources ]]
+      "claude_code",
+      -- your other sources]
     },
     providers = {
       claude_code = {
