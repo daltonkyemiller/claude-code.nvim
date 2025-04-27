@@ -123,19 +123,6 @@ local defaults = {
   ---Setting a prompt template to false will remove it from the completion list
   ---@type table<string, claude-code.PromptTemplate | false>
   prompt_templates = {
-    ["#buffer"] = {
-      desc = "Paste path of an open buffer",
-      on_execute = function(replace_text, state)
-        if state.last_visited_bufnr == nil or vim.api.nvim_buf_is_valid(state.last_visited_bufnr) == false then
-          vim.notify("No last visited buffer", vim.log.levels.ERROR)
-          return replace_text("")
-        end
-
-        local file_name = vim.api.nvim_buf_get_name(state.last_visited_bufnr)
-        local relative_to_cwd = vim.fn.fnamemodify(file_name, ":.")
-        replace_text(relative_to_cwd)
-      end,
-    },
     ["#diagnostics"] = {
       desc = "Paste diagnostics from an open buffer",
       on_execute = function(replace_text, state)
