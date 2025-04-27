@@ -1,6 +1,7 @@
 local buffers = require("claude-code.buffers")
 local commands = require("claude-code.commands")
 local config = require("claude-code.config")
+local files = require("claude-code.files")
 local state = require("claude-code.state")
 local terminal = require("claude-code.terminal")
 
@@ -115,6 +116,21 @@ local function update_movement_mappings(current_normal_mappings, current_insert_
   end
 end
 
+function add_files_to_ctx()
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local row = pos[1] - 1
+  local col = pos[2]
+
+  files.pick(function(paths)
+    vim.api.nvim_set_current_win(state.input_winnr)
+    local text = vim.iter(paths):map(function(path) return "@" .. path end):join(" ")
+    vim.api.nvim_buf_set_text(0, row, col, row, col, { text })
+    -- set the cursor to the end of the inserted text
+    vim.api.nvim_win_set_cursor(0, { row + 1, col + #text })
+    return nil
+  end)
+end
+
 local M = {}
 
 M.setup_input_bufr_mappings = function()
@@ -139,6 +155,8 @@ M.setup_input_bufr_mappings = function()
     bufnr
   )
 
+  setup_both_mode_mappings(keymaps.pick_file, add_files_to_ctx, bufnr)
+
   -- Set keymap to close
   setup_both_mode_mappings(keymaps.close, commands.hide, bufnr)
 
@@ -149,9 +167,7 @@ M.setup_input_bufr_mappings = function()
   local autocmds = require("claude-code.autocmds")
   autocmds.setup_input_buffer_text_changed(
     bufnr,
-    current_normal_mappings,
-    current_insert_mappings,
-    update_movement_mappings
+    function() update_movement_mappings(current_normal_mappings, current_insert_mappings) end
   )
 
   -- Initial setup of mappings

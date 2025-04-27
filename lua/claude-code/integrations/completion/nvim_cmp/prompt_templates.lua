@@ -1,6 +1,6 @@
 local completion_utils = require("claude-code.integrations.completion.utils")
 local config = require("claude-code.config"):get()
-local nvim_cmp_utils = require("utils")
+local nvim_cmp_utils = require("claude-code.integrations.completion.nvim_cmp.utils")
 
 ---@class PromptTemplateSource : cmp.Source
 local PromptTemplateSource = {}

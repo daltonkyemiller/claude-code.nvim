@@ -28,14 +28,14 @@ function M.setup(on_close)
   })
 end
 
-function M.setup_input_buffer_text_changed(bufnr, current_normal_mappings, current_insert_mappings, update_callback)
+function M.setup_input_buffer_text_changed(bufnr, update_callback)
   local group = vim.api.nvim_create_augroup("ClaudeCodeInputBuffer", { clear = true })
 
   -- Autocmd for updating mappings when buffer content changes
   vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
     group = group,
     buffer = bufnr,
-    callback = function() update_callback(current_normal_mappings, current_insert_mappings) end,
+    callback = update_callback,
   })
 end
 

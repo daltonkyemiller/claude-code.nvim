@@ -3,50 +3,15 @@
 vim.env.LAZY_STDPATH = ".tests"
 load(vim.fn.system("curl -s https://raw.githubusercontent.com/folke/lazy.nvim/main/bootstrap.lua"))()
 
+local plugin_config = require("tests.plugin_config")
+
 -- set leader key
 vim.g.mapleader = " "
 
 -- Setup lazy.nvim
-require("lazy.minit").repro({
+require("lazy.minit").setup({
   spec = {
-    {
-      dir = ".",
-      event = "VeryLazy",
-      opts = {
-        -- debug = true,
-        window = {
-          -- position = "float",
-          width = 40,
-        },
-        keymaps = {
-          arrow_down = {
-            i = false,
-          },
-          arrow_up = {
-            i = false,
-          },
-          arrow_left = {
-            i = false,
-          },
-          arrow_right = {
-            i = false,
-          },
-        },
-        experimental = {
-          hide_input_box = true,
-        },
-      },
-      keys = {
-        {
-          "<leader>cc",
-          function() require("claude-code.commands").toggle() end,
-        },
-        {
-          "<leader>cF",
-          function() require("claude-code.commands").focus() end,
-        },
-      },
-    },
+    plugin_config,
     { -- Autocompletion
       "hrsh7th/nvim-cmp",
       event = "InsertEnter",

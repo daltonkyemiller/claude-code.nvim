@@ -1,5 +1,6 @@
 ---@class claude-code.PromptTemplate
 ---@field desc string
+---@field picker_provider "telescope" | "snacks" | "detect"
 ---@field on_execute fun(replace_text: (fun(text: string): nil), state: claude-code.State): nil
 
 ---@class claude-code.Config
@@ -7,6 +8,7 @@ local defaults = {
   debug = false,
   cmd = "claude",
   hide_cli_input_box = true,
+  picker_provider = "detect",
   window = {
     position = "right",
     width = 40,
@@ -16,6 +18,10 @@ local defaults = {
     submit = {
       i = "<C-s>",
       n = "<CR>",
+    },
+    pick_file = {
+      n = "@",
+      i = "@",
     },
     shift_tab = {
       n = "<S-Tab>",
