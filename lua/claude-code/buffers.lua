@@ -85,4 +85,3 @@ function M.delete_buffers()
 end
 
 return M
-
