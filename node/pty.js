@@ -1,4 +1,4 @@
-import pty from "node-pty";
+import pty from "@homebridge/node-pty-prebuilt-multiarch";
 import { stripAnsi } from "./strip-ansi.js";
 import { connectToLoggingServer, log } from "./logging.js";
 

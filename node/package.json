@@ -12,6 +12,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "node-pty": "^1.0.0"
+    "@homebridge/node-pty-prebuilt-multiarch": "^0.12.0"
   }
 }
