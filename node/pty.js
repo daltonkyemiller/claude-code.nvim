@@ -1,6 +1,5 @@
 import pty from "@homebridge/node-pty-prebuilt-multiarch";
 import { stripAnsi } from "./strip-ansi.js";
-import { connectToLoggingServer, log } from "./logging.js";
 
 process.title = "claude-code-pty-wrapper";
 
@@ -21,11 +20,6 @@ const shell = pty.spawn(cmdArg, [], {
   cwd: import.meta.dir,
   env: process.env,
 });
-
-if (process.argv.includes("--debug")) {
-  connectToLoggingServer();
-  log("Debug mode enabled");
-}
 
 function stripInputBox(text) {
   let lines = text.split("\n");
@@ -57,7 +51,7 @@ function stripInputBox(text) {
   // We process from end to start to avoid index shifting
   inputBoxes.reverse().forEach(([start, end]) => {
     // Replace the input box content with empty lines
-    for (let i = start - 1; i <= end + 1; i++) {
+    for (let i = start - 1; i <= end + 2; i++) {
       lines[i] = "";
     }
   });
@@ -70,7 +64,7 @@ function stripInputBox(text) {
 
 let buffer = "";
 
-shell.on("data", function (data) {
+shell.onData((data) => {
   buffer += data;
   debounceRender();
 });
